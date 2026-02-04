@@ -1,0 +1,11 @@
+# VS Code 
+.vscode/
+.history/
+
+# Temporal files
+*.log
+.tmp/
+
+
+# Environment variables
+.env
