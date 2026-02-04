@@ -9,6 +9,8 @@
 
 # Environment variables
 .env
+sshkey
+sshkey.pub
 
 # backup directories
 backups/
