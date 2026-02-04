@@ -9,3 +9,6 @@
 
 # Environment variables
 .env
+
+# backup directories
+backups/
