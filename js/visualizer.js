@@ -27,8 +27,8 @@ const Visualizer = {
             mode: 'lines',
             line: { color: '#fbbf24', width: 2 },
             fill: 'tozeroy',
-            fillcolor: 'rgba(226, 203, 128, 0.2)'
-
+            fillcolor: 'rgba(226, 203, 128, 0.2)',
+            hovertemplate: '<b>Solar Energy</b><br>%{y:.2f} kWh<extra></extra>'
         };
 
         const importTrace = {
@@ -37,7 +37,8 @@ const Visualizer = {
             name: 'Grid Import (kWh)',
             type: 'scatter',
             mode: 'lines',
-            line: { color: '#3b82f6', width: 2 }
+            line: { color: '#3b82f6', width: 2 },
+            hovertemplate: '<b>Grid Import</b><br>%{y:.2f} kWh<extra></extra>'
         };
 
         const exportTrace = {
@@ -46,7 +47,8 @@ const Visualizer = {
             name: 'Grid Export (kWh)',
             type: 'scatter',
             mode: 'lines',
-            line: { color: '#10b981', width: 2 }
+            line: { color: '#10b981', width: 2 },
+            hovertemplate: '<b>Grid Export</b><br>%{y:.2f} kWh<extra></extra>'
         };
 
         const layout = {
@@ -59,66 +61,79 @@ const Visualizer = {
             template: 'plotly_dark',
             xaxis: { 
                 title: 'Time', 
-                gridcolor: '#30363d',
-                rangeslider: { visible: true, bgcolor: '#161b22' } 
+                gridcolor: '#495057',
+                tickfont: { color: '#cbd5e1' },
+                title: { font: { color: '#e6edf3' } }
             },
             yaxis: { 
-                title: 'Energy (kWh)', //'Value (kW / kWh)',
-                gridcolor: '#30363d'
+                title: 'Energy (kWh)',
+                gridcolor: '#495057',
+                tickfont: { color: '#cbd5e1' },
+                title: { font: { color: '#e6edf3' } }
             },
-            // Add toggle buttons for switching between Power and Energy views
-            updatemenus: [{
-                active: 1, // Default to Energy view
-                buttons: [
-                    {
-                        args: [
-                            // 1st object: Updates for traces (data and legend names)
-                            { 
-                                'y': [solarPower, importData, exportData],
-                                'name': ['Solar Production (kW)', 'Grid Import (kWh)', 'Grid Export (kWh)'] 
-                            },
-                            // 2nd object: Updates for layout (axis titles)
-                            { 
-                                'yaxis.title.text': 'Power (kW) / Energy (kWh)' 
-                            }
-                        ],
-                        label: 'Show Power (kW)',
-                        method: 'update'
-                    },
-                    {
-                        args: [
-                            // 1st object: Updates for traces (data and legend names)
-                            { 
-                                'y': [solarEnergy, importData, exportData],
-                                'name': ['Solar Energy (kWh)', 'Grid Import (kWh)', 'Grid Export (kWh)'] 
-                            },
-                            // 2nd object: Updates for layout (axis titles)
-                            { 
-                                'yaxis.title.text': 'Energy (kWh)' 
-                            }
-                        ],
-                        label: 'Show Energy (kWh)',
-                        method: 'update'
-                    }
-                ],
-                direction: 'left',
-                pad: { 'r': 10, 't': 10 },
-                showactive: true,
-                type: 'buttons',
-                x: 0.1,
-                xanchor: 'left',
-                y: 1.15,
-                yanchor: 'top',
-                font: { color: '#ffffff' },
-                bgcolor: '#1f5a9e',
-                bordercolor: '#30363d'
-            }],
-            margin: { t: 80, b: 50, l: 50, r: 20 },
-            hovermode: 'x unified'
+            legend: {
+                font: { color: '#cbd5e1' }
+            },
+            margin: { t: 50, b: 50, l: 50, r: 20 },
+            hovermode: 'x unified',
+            hoverlabel: {
+                bgcolor: '#1e293b',
+                bordercolor: '#2f81f7',
+                font: { 
+                    family: 'Segoe UI, Tahoma, Geneva, Verdana, sans-serif',
+                    size: 13,
+                    color: '#e6edf3'
+                }
+            }
         };
 
         const config = { responsive: true };
 
         Plotly.newPlot('chartContainer', [solarTrace, importTrace, exportTrace], layout, config);
+
+        // Show custom toggle buttons
+        document.getElementById('viewToggleContainer').style.display = 'block';
+
+        // Custom button handlers for view switching
+        const btnPower = document.getElementById('btnShowPower');
+        const btnEnergy = document.getElementById('btnShowEnergy');
+
+        btnPower.addEventListener('click', function() {
+            Plotly.update('chartContainer', 
+                {
+                    'y': [solarPower, importData, exportData],
+                    'name': ['Solar Production (kW)', 'Grid Import (kWh)', 'Grid Export (kWh)'],
+                    'hovertemplate': [
+                        '<b>Solar Power</b><br>%{y:.2f} kW<extra></extra>',
+                        '<b>Grid Import</b><br>%{y:.2f} kWh<extra></extra>',
+                        '<b>Grid Export</b><br>%{y:.2f} kWh<extra></extra>'
+                    ]
+                },
+                {
+                    'yaxis.title.text': 'Power (kW) / Energy (kWh)'
+                }
+            );
+            btnPower.classList.add('active');
+            btnEnergy.classList.remove('active');
+        });
+
+        btnEnergy.addEventListener('click', function() {
+            Plotly.update('chartContainer',
+                {
+                    'y': [solarEnergy, importData, exportData],
+                    'name': ['Solar Energy (kWh)', 'Grid Import (kWh)', 'Grid Export (kWh)'],
+                    'hovertemplate': [
+                        '<b>Solar Energy</b><br>%{y:.2f} kWh<extra></extra>',
+                        '<b>Grid Import</b><br>%{y:.2f} kWh<extra></extra>',
+                        '<b>Grid Export</b><br>%{y:.2f} kWh<extra></extra>'
+                    ]
+                },
+                {
+                    'yaxis.title.text': 'Energy (kWh)'
+                }
+            );
+            btnEnergy.classList.add('active');
+            btnPower.classList.remove('active');
+        });
     }
 };

@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BESS Analytics - Data Import</title>
+    <title>BESS Analytics - Capacity Optimizer</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <h1>BESS Analytics</h1>
+        <h1>BESS Analytics - Capacity Optimizer</h1>
         
         <div class="import-section">
             <div style="margin-bottom: 20px;">
@@ -20,22 +20,206 @@
                 <label><strong>2. Grid Meter Data (Import/Export):</strong></label><br>
                 <input type="file" id="gridInput" accept=".csv">
             </div>
+            
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+                <label><strong>Or try with demo data:</strong></label><br>
+                <button id="loadDemoBtn" class="demo-load-btn">📊 Load Demo Scenarios</button>
+            </div>
         </div>
 
-        <div id="datePickerSection" style="margin-top: 25px; display: none; padding: 15px; border: 1px solid #ccc;">
+        <div id="datePickerSection" class="import-section" style="margin-top: 25px; display: none;">
             <h3>Simulation Period</h3>
-            <p>Select the start and end dates for your analysis:</p>
-            <label>Start:</label>
-            <input type="datetime-local" id="startDate">
-            <label>End:</label>
-            <input type="datetime-local" id="endDate">
-            <br><br>
-            <button id="runSimulation">Update Visualization</button>
+            
+            <div class="time-range-controls">
+                <label class="range-label">Time Range:</label>
+                <div class="preset-buttons">
+                    <button class="preset-btn" data-preset="week">Week</button>
+                    <button class="preset-btn" data-preset="month">Month</button>
+                    <button class="preset-btn" data-preset="year">Year</button>
+                    <button class="preset-btn" data-preset="full">Full Range</button>
+                    <button class="preset-btn active" data-preset="custom">Custom</button>
+                </div>
+                
+                <div class="nav-buttons">
+                    <button class="nav-btn" id="btnPrevRange" title="Previous period">←</button>
+                    <button class="nav-btn" id="btnNextRange" title="Next period">→</button>
+                </div>
+                
+                <button class="current-btn" id="btnCurrent">Current</button>
+            </div>
+
+            <div id="customDateInputs" class="custom-date-inputs">
+                <div class="date-input-group">
+                    <label>Start Date & Time</label>
+                    <input type="datetime-local" id="startDate">
+                </div>
+                <div class="date-input-group">
+                    <label>End Date & Time</label>
+                    <input type="datetime-local" id="endDate">
+                </div>
+            </div>
+
+            <button id="runSimulation" class="apply-range-btn">Apply Range for Simulation</button>
+            
+            <div id="dataStatus" class="data-status"></div>
         </div>
 
         <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
 
-        <div id="chartContainer" style="margin-top: 30px; height: 600px; width: 100%; display:none;"></div>
+        <div id="viewToggleContainer" style="margin-top: 30px; display:none;">
+            <div class="button-group">
+                <button id="btnShowPower" class="view-toggle-btn">Show Solar Power (kW)</button>
+                <button id="btnShowEnergy" class="view-toggle-btn active">Show Solar Energy (kWh)</button>
+            </div>
+        </div>
+
+        <div id="chartContainer" style="margin-top: 10px; height: 600px; width: 100%; display:none;"></div>
+
+        <!-- Battery Configuration Section -->
+        <div id="batteryConfigSection" class="import-section" style="margin-top: 25px; display: none;">
+            <h3>🔋 Battery Configuration</h3>
+            
+            <!-- TEMPORARY WARNING - REMOVE WHEN READY -->
+            <div class="dev-warning">
+                ⚠️ <strong>UNDER DEVELOPMENT:</strong> Battery simulation algorithm is currently under development and testing. Results may not be accurate. Use for testing purposes only.
+            </div>
+            
+            <div id="simulationTimeRange" class="simulation-time-info" style="display: none;">
+                📅 <strong>Simulation Period:</strong> <span id="simPeriodDisplay">Not set</span>
+            </div>
+            
+            <div class="config-grid">
+                <div class="config-item">
+                    <label for="batteryCapacity">Capacity (kWh):</label>
+                    <input type="number" id="batteryCapacity" min="1" max="5000" step="0.1" value="10">
+                </div>
+                
+                <div class="config-item">
+                    <label for="chargeEfficiency">Charge Efficiency (%):</label>
+                    <input type="number" id="chargeEfficiency" min="80" max="100" step="0.1" value="96">
+                </div>
+                
+                <div class="config-item">
+                    <label for="dischargeEfficiency">Discharge Efficiency (%):</label>
+                    <input type="number" id="dischargeEfficiency" min="80" max="100" step="0.1" value="92">
+                </div>
+                
+                <div class="config-item">
+                    <label for="maxChargeRate">Max Charge Rate (kW):</label>
+                    <input type="number" id="maxChargeRate" min="1" max="50" step="0.1" value="5">
+                </div>
+                
+                <div class="config-item">
+                    <label for="maxDischargeRate">Max Discharge Rate (kW):</label>
+                    <input type="number" id="maxDischargeRate" min="1" max="50" step="0.1" value="5">
+                </div>
+                
+                <div class="config-item">
+                    <label for="minSoc">Min SOC (%):</label>
+                    <input type="number" id="minSoc" min="0" max="50" step="1" value="10">
+                </div>
+                
+                <div class="config-item">
+                    <label for="maxSoc">Max SOC (%):</label>
+                    <input type="number" id="maxSoc" min="50" max="100" step="1" value="90">
+                </div>
+                
+                <div class="config-item">
+                    <label for="inverterMode">Inverter Mode:</label>
+                    <select id="inverterMode">
+                        <option value="asymmetric" selected>Asymmetric (Net Metering)</option>
+                        <option value="symmetric">Symmetric (Separate Flows)</option>
+                    </select>
+                </div>
+                
+                <div class="config-item">
+                    <label for="currency">Currency:</label>
+                    <select id="currency">
+                        <option value="HUF" selected>HUF (Ft)</option>
+                        <option value="EUR">EUR (€)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <button id="btnRunBatterySimulation" class="run-simulation-btn">Run Battery Simulation</button>
+        </div>
+
+        <!-- Simulation Results Section -->
+        <div id="simulationResults" style="margin-top: 30px; display: none;">
+            <h3>📊 Simulation Results</h3>
+            
+            <!-- KPI Cards -->
+            <div class="kpi-cards">
+                <div class="kpi-card kpi-success">
+                    <div class="kpi-label">Grid Import Reduction</div>
+                    <div class="kpi-value" id="kpiImportReduction">0 kWh</div>
+                    <div class="kpi-subtitle" id="kpiImportPercent">0%</div>
+                </div>
+                
+                <div class="kpi-card kpi-success">
+                    <div class="kpi-label">Grid Export Reduction</div>
+                    <div class="kpi-value" id="kpiExportReduction">0 kWh</div>
+                    <div class="kpi-subtitle" id="kpiExportPercent">0%</div>
+                </div>
+                
+                <div class="kpi-card kpi-info">
+                    <div class="kpi-label">Battery Self-Consumption</div>
+                    <div class="kpi-value" id="kpiBatterySelfConsumption">0 kWh</div>
+                    <div class="kpi-subtitle">Additional solar used</div>
+                </div>
+                
+                <div class="kpi-card kpi-warning">
+                    <div class="kpi-label">Battery Losses</div>
+                    <div class="kpi-value" id="kpiBatteryLosses">0 kWh</div>
+                    <div class="kpi-subtitle" id="kpiLossPercent">0%</div>
+                </div>
+                
+                <div class="kpi-card kpi-financial">
+                    <div class="kpi-label">Baseline Cost</div>
+                    <div class="kpi-value" id="kpiBaselineCost">0 Ft</div>
+                    <div class="kpi-subtitle">Without battery</div>
+                </div>
+                
+                <div class="kpi-card kpi-financial">
+                    <div class="kpi-label">Battery Scenario Cost</div>
+                    <div class="kpi-value" id="kpiBatteryCost">0 Ft</div>
+                    <div class="kpi-subtitle">With battery</div>
+                </div>
+                
+                <div class="kpi-card kpi-financial kpi-highlight">
+                    <div class="kpi-label">Total Savings</div>
+                    <div class="kpi-value" id="kpiTotalSavings">0 Ft</div>
+                    <div class="kpi-subtitle" id="kpiSavingsPercent">0%</div>
+                </div>
+            </div>
+            
+            <!-- Solar Self-Consumption Comparison -->
+            <div class="solar-comparison">
+                <h4>☀️ Solar Self-Consumption</h4>
+                <div class="comparison-cards">
+                    <div class="comparison-card">
+                        <div class="card-title">Before (No Battery)</div>
+                        <div class="card-value" id="beforeSelfConsumption">0 kWh</div>
+                        <div class="card-rate" id="beforeSelfConsumptionRate">0%</div>
+                    </div>
+                    
+                    <div class="comparison-card highlight">
+                        <div class="card-title">After (With Battery)</div>
+                        <div class="card-value" id="afterSelfConsumption">0 kWh</div>
+                        <div class="card-rate" id="afterSelfConsumptionRate">0%</div>
+                    </div>
+                    
+                    <div class="comparison-card improvement">
+                        <div class="card-title">Improvement</div>
+                        <div class="card-value" id="improvementSelfConsumption">+0 kWh</div>
+                        <div class="card-rate" id="improvementSelfConsumptionRate">+0%</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Comparison Chart -->
+            <div id="comparisonChart" style="margin-top: 30px; height: 500px; width: 100%"></div>
+        </div>
 
         <div id="output" style="margin-top: 20px; white-space: pre-wrap; font-family: monospace; font-size: 12px; background: #f4f4f4; padding: 10px;">
             Waiting for files...
@@ -49,6 +233,7 @@
     <script src="js/csv_handler.js"></script>
     <script src="js/data_merger.js"></script>
     <script src="js/visualizer.js"></script>
+    <script src="js/simulation.js"></script>
     <script src="js/app.js"></script>
     <script>
         const version = 'v1.0.0';

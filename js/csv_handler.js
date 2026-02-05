@@ -63,5 +63,44 @@ const CSVHandler = {
         const commaCount = (text.match(/,/g) || []).length;
         const semiColonCount = (text.match(/;/g) || []).length;
         return semiColonCount > commaCount ? ';' : ',';
+    },
+
+    /**
+     * Validates CSV structure based on expected column count
+     * @param {string} text - Raw CSV content
+     * @param {string} type - 'solar' (expects 2 columns) or 'grid' (expects 3 columns)
+     * @returns {Object} { valid: boolean, error: string|null }
+     */
+    validateStructure(text, type) {
+        const delimiter = this.detectDelimiter(text.slice(0, 1000));
+        const lines = text.split(/\r?\n/).filter(line => line.trim() !== "");
+        
+        if (lines.length < 2) {
+            return { valid: false, error: 'CSV file must have at least a header row and one data row' };
+        }
+
+        const headerCols = lines[0].split(delimiter).length;
+        const expectedCols = type === 'solar' ? 2 : 3;
+
+        if (headerCols !== expectedCols) {
+            return { 
+                valid: false, 
+                error: `Invalid ${type} CSV: Expected exactly ${expectedCols} columns, found ${headerCols}. ${type === 'solar' ? 'This looks like a Grid file.' : 'This looks like a Solar file.'}` 
+            };
+        }
+
+        // Check a few data rows for consistency
+        const rowsToCheck = Math.min(5, lines.length - 1);
+        for (let i = 1; i <= rowsToCheck; i++) {
+            const colCount = lines[i].split(delimiter).length;
+            if (colCount !== expectedCols) {
+                return { 
+                    valid: false, 
+                    error: `Invalid ${type} CSV: Row ${i + 1} has ${colCount} columns (expected exactly ${expectedCols})` 
+                };
+            }
+        }
+
+        return { valid: true, error: null };
     }
 };

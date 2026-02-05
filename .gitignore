@@ -13,3 +13,6 @@ ssh*
 
 # backup directories
 backups/
+
+# GitHub related
+.github/
