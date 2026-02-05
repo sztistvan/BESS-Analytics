@@ -109,8 +109,8 @@ const Visualizer = {
                 xanchor: 'left',
                 y: 1.15,
                 yanchor: 'top',
-                font: { color: '#307d91' },
-                bgcolor: '#21262d',
+                font: { color: '#ffffff' },
+                bgcolor: '#1f5a9e',
                 bordercolor: '#30363d'
             }],
             margin: { t: 80, b: 50, l: 50, r: 20 },

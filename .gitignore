@@ -9,8 +9,7 @@
 
 # Environment variables
 .env
-sshkey
-sshkey.pub
+ssh*
 
 # backup directories
 backups/

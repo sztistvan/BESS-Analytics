@@ -42,9 +42,18 @@
         </div>
     </div>
 
+    <footer>
+        <p id="version-info"></p>
+    </footer>
+
     <script src="js/csv_handler.js"></script>
     <script src="js/data_merger.js"></script>
     <script src="js/visualizer.js"></script>
     <script src="js/app.js"></script>
+    <script>
+        const version = 'v1.0.0';
+        const buildDate = new Date();
+        document.getElementById('version-info').innerText = `Version: ${version} - Last Updated: ${buildDate.toLocaleString()}`;
+    </script>
 </body>
 </html>
