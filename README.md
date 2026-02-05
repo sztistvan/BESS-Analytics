@@ -28,7 +28,7 @@ The simulation requires two separate Excel files:
 3. **Analyze results:** View interactive Plotly charts and check the estimated payback period.
 
 ### Live Demo
-🚀 **[Link to GitHub Pages - Coming Soon]**
+🚀 **[[BESS-Analytics](https://sztistvan.github.io/BESS-Analytics/)]**
 
 ---
 

@@ -18,7 +18,7 @@ const Visualizer = {
             name: 'Solar Production (kW)',
             type: 'scatter',
             mode: 'lines',
-            line: { color: '#f39c12', width: 1.5 }
+            line: { color: '#fbbf24', width: 1.5 }
         };
 
         const importTrace = {
@@ -27,7 +27,7 @@ const Visualizer = {
             name: 'Grid Import (kWh)',
             type: 'scatter',
             mode: 'lines',
-            line: { color: '#497fe4', width: 1 }
+            line: { color: '#3b82f6', width: 1 }
         };
 
         const exportTrace = {
@@ -36,7 +36,7 @@ const Visualizer = {
             name: 'Grid Export (kWh)',
             type: 'scatter',
             mode: 'lines',
-            line: { color: '#2da11e', width: 1 }
+            line: { color: '#10b981', width: 1 }
         };
 
         const layout = {
