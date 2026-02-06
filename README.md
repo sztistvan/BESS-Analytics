@@ -3,7 +3,7 @@
 **Battery Energy Capacity Optimization and Economics Benefit Analysis** - An open-source, browser-based tool for analyzing solar + battery storage systems with advanced optimization features.
 
 [![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/sztistvan/BEES_Analytics/releases)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/sztistvan/BEES_Analytics)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![JavaScript](https://img.shields.io/badge/javascript-ES6+-yellow.svg)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 [![Plotly](https://img.shields.io/badge/plotly.js-2.27.0-purple.svg)](https://plotly.com/javascript/)
 
@@ -241,7 +241,7 @@ Contributions welcome!
 
 ### 📄 License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ### 🙏 Acknowledgments
 
@@ -438,7 +438,7 @@ Hozzájárulásokat szívesen fogadunk!
 
 ### 📄 Licenc
 
-Ez a projekt MIT licenc alatt van.
+Ez a projekt MIT licenc alatt van - részletekért lásd a [LICENSE](LICENSE) fájlt.
 
 ### 📧 Kapcsolat & Támogatás
 
