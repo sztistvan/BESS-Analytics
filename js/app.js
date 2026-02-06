@@ -12,6 +12,10 @@ const App = {
     // Locked simulation time range (set when Apply Range is clicked)
     simulationStartDate: null,
     simulationEndDate: null,
+    // Store current simulation results for energy flow chart
+    currentSimulationResults: null,
+    // Track if energy flow toggle listeners are attached
+    energyFlowListenersAttached: false,
 
     /**
      * Format number with space as thousand separator
@@ -574,9 +578,15 @@ const App = {
         // Run simulation
         const results = BatterySimulation.simulate(filtered);
 
+        // Store simulation results for energy flow chart
+        this.currentSimulationResults = results;
+
         // Display results
         this.displaySimulationResults(results.metrics);
         this.renderComparisonChart(results.metrics);
+        
+        // Render energy flow chart
+        this.renderEnergyFlowChart(results.simulatedData, filtered);
 
         // Show results section
         document.getElementById('simulationResults').style.display = 'block';
@@ -728,6 +738,99 @@ const App = {
             responsive: true,
             displayModeBar: true
         });
+    },
+
+    /**
+     * Render energy flow comparison chart
+     * @param {Array} simulatedData - Simulation results with battery intervention
+     * @param {Array} originalData - Filtered original merged data
+     */
+    renderEnergyFlowChart(simulatedData, originalData) {
+        if (!this.simulationStartDate || !this.simulationEndDate) {
+            console.warn('Simulation range not set');
+            return;
+        }
+
+        // Get current view type from active button (default: energy)
+        const energyBtn = document.getElementById('btnEnergyFlowEnergy');
+        const viewType = energyBtn && energyBtn.classList.contains('active') ? 'energy' : 'power';
+
+        // Render chart
+        Visualizer.renderEnergyFlowChart(
+            simulatedData,
+            this.simulationStartDate,
+            this.simulationEndDate,
+            originalData,
+            viewType
+        );
+
+        // Show container
+        const section = document.getElementById('energyFlowChartSection');
+        if (section) {
+            section.style.display = 'block';
+        }
+
+        // Setup toggle event listeners (only once)
+        if (!this.energyFlowListenersAttached) {
+            this.setupEnergyFlowToggleListeners();
+            this.energyFlowListenersAttached = true;
+        }
+    },
+
+    /**
+     * Setup event listeners for energy flow chart toggle buttons
+     */
+    setupEnergyFlowToggleListeners() {
+        const powerBtn = document.getElementById('btnEnergyFlowPower');
+        const energyBtn = document.getElementById('btnEnergyFlowEnergy');
+
+        if (powerBtn) {
+            powerBtn.addEventListener('click', () => {
+                this.toggleEnergyFlowView('power');
+            });
+        }
+
+        if (energyBtn) {
+            energyBtn.addEventListener('click', () => {
+                this.toggleEnergyFlowView('energy');
+            });
+        }
+    },
+
+    /**
+     * Toggle energy flow chart view between power and energy
+     * @param {String} viewType - 'power' or 'energy'
+     */
+    toggleEnergyFlowView(viewType) {
+        // Update button styles
+        const powerBtn = document.getElementById('btnEnergyFlowPower');
+        const energyBtn = document.getElementById('btnEnergyFlowEnergy');
+
+        if (viewType === 'power') {
+            powerBtn.classList.add('active');
+            energyBtn.classList.remove('active');
+        } else {
+            energyBtn.classList.add('active');
+            powerBtn.classList.remove('active');
+        }
+
+        // Re-render chart if simulation exists
+        if (this.currentSimulationResults) {
+            const startTimestamp = new Date(this.simulationStartDate).getTime();
+            const endTimestamp = new Date(this.simulationEndDate).getTime();
+
+            const filteredData = this.mergedData.filter(row => {
+                return row.timestampMs >= startTimestamp && row.timestampMs <= endTimestamp;
+            });
+
+            Visualizer.renderEnergyFlowChart(
+                this.currentSimulationResults.simulatedData,
+                this.simulationStartDate,
+                this.simulationEndDate,
+                filteredData,
+                viewType
+            );
+        }
     }
 };
 

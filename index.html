@@ -228,6 +228,16 @@
             
             <!-- Comparison Chart -->
             <div id="comparisonChart" style="margin-top: 30px; height: 500px; width: 100%"></div>
+            
+            <!-- Energy Flow Chart Section -->
+            <div id="energyFlowChartSection" style="display: none; margin-top: 30px;">
+                <h3 style="margin-bottom: 15px; color: var(--text-color);">Energy Flow: Original vs Optimized</h3>
+                <div class="button-group" style="margin-bottom: 10px;">
+                    <button id="btnEnergyFlowPower" class="view-toggle-btn">Show Solar Power (kW)</button>
+                    <button id="btnEnergyFlowEnergy" class="view-toggle-btn active">Show Solar Energy (kWh)</button>
+                </div>
+                <div id="energyFlowChartContainer" style="height: 600px; width: 100%;"></div>
+            </div>
         </div>
 
         <div id="output" style="margin-top: 20px; white-space: pre-wrap; font-family: monospace; font-size: 12px; background: #f4f4f4; padding: 10px;">
