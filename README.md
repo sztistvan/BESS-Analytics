@@ -2,8 +2,8 @@
 
 **Battery Energy Capacity Optimization and Economics Benefit Analysis** - An open-source, browser-based tool for analyzing solar + battery storage systems with advanced optimization features.
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/YOUR_USERNAME/BEES_Analytics/releases)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/sztistvan/BEES_Analytics/releases)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/sztistvan/BEES_Analytics)
 [![JavaScript](https://img.shields.io/badge/javascript-ES6+-yellow.svg)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 [![Plotly](https://img.shields.io/badge/plotly.js-2.27.0-purple.svg)](https://plotly.com/javascript/)
 
@@ -170,7 +170,7 @@ BEES_Analytics/
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/BEES_Analytics.git
+git clone https://github.com/sztistvan/BEES_Analytics.git
 
 # Navigate to directory
 cd BEES_Analytics
@@ -230,7 +230,7 @@ xdg-open index.html
 
 ### 🤝 Contributing
 
-Contributions welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+Contributions welcome!
 
 **Ways to contribute:**
 - 🐛 Report bugs via GitHub Issues
@@ -241,7 +241,7 @@ Contributions welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guideli
 
 ### 📄 License
 
-This project is licensed under the MIT License - see [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License.
 
 ### 🙏 Acknowledgments
 
@@ -251,9 +251,9 @@ This project is licensed under the MIT License - see [LICENSE](LICENSE) file for
 
 ### 📧 Contact & Support
 
-- **Issues**: [GitHub Issues](https://github.com/YOUR_USERNAME/BEES_Analytics/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/YOUR_USERNAME/BEES_Analytics/discussions)
-- **Email**: your.email@example.com
+- **GitHub**: [@sztistvan](https://github.com/sztistvan)
+- **Issues**: [GitHub Issues](https://github.com/sztistvan/BEES_Analytics/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/sztistvan/BEES_Analytics/discussions) 
 
 ### 📊 Citation
 
@@ -261,10 +261,10 @@ If you use this tool in research, please cite:
 
 ```bibtex
 @software{bees_analytics_2026,
-  author = {Your Name},
+  author = {István Szatmári},
   title = {BEES Analytics: Battery Energy Economics Simulator},
   year = {2026},
-  url = {https://github.com/YOUR_USERNAME/BEES_Analytics},
+  url = {https://github.com/sztistvan/BEES_Analytics},
   version = {1.0.0}
 }
 ```
@@ -406,7 +406,7 @@ Példa: 30 napos szimuláció → Tier1 limit = 2,523 × (30/365) ≈ 207 kWh
 
 ```bash
 # Repository klónozása
-git clone https://github.com/YOUR_USERNAME/BEES_Analytics.git
+git clone https://github.com/sztistvan/BEES_Analytics.git
 
 # Navigálj a könyvtárba
 cd BEES_Analytics
@@ -434,17 +434,17 @@ start index.html
 
 ### 🤝 Közreműködés
 
-Hozzájárulásokat szívesen fogadunk! Kérlek nézd meg a [CONTRIBUTING.md](CONTRIBUTING.md) útmutatót.
+Hozzájárulásokat szívesen fogadunk!
 
 ### 📄 Licenc
 
-Ez a projekt MIT licenc alatt van - részletekért lásd a [LICENSE](LICENSE) fájlt.
+Ez a projekt MIT licenc alatt van.
 
 ### 📧 Kapcsolat & Támogatás
 
-- **Hibák**: [GitHub Issues](https://github.com/YOUR_USERNAME/BEES_Analytics/issues)
-- **Beszélgetések**: [GitHub Discussions](https://github.com/YOUR_USERNAME/BEES_Analytics/discussions)
-- **Email**: your.email@example.com
+- **GitHub**: [@sztistvan](https://github.com/sztistvan)
+- **Hibák**: [GitHub Issues](https://github.com/sztistvan/BEES_Analytics/issues)
+- **Beszélgetések**: [GitHub Discussions](https://github.com/sztistvan/BEES_Analytics/discussions)
 
 ---
 
