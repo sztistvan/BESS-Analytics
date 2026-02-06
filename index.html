@@ -342,7 +342,7 @@
                                             <ul>
                                                 <li>2 columns: <code>Timestamp, Production (kW)</code></li>
                                                 <li>15-minute intervals</li>
-                                                <li>Flexible date formats accepted:
+                                                <li>Example timestamp formats:
                                                     <ul>
                                                         <li><code>YYYY-MM-DD HH:mm</code> (e.g., 2024-10-01 14:30)</li>
                                                         <li><code>M/D/YYYY H:mm</code> (e.g., 1/1/2024 0:15)</li>
@@ -364,18 +364,29 @@
                                             <ul>
                                                 <li>3 columns: <code>Timestamp, Import (kWh), Export (kWh)</code></li>
                                                 <li>15-minute energy intervals</li>
-                                                <li>Flexible date formats (can differ from solar file):
+                                                <li>Example timestamp formats:
                                                     <ul>
                                                         <li><code>YYYY-MM-DD HH:mm</code></li>
                                                         <li><code>M/D/YYYY H:mm</code></li>
                                                         <li><code>YYYY.MM.DD. HH:mm</code></li>
                                                     </ul>
                                                 </li>
-                                                <li>Note: Timestamps don't need to match solar format</li>
                                             </ul>
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                            
+                            <div class="info-box" style="margin-top: 30px; background: rgba(59, 130, 246, 0.1); border-left: 3px solid #3b82f6;">
+                                <strong>⏰ Universal Timestamp Handling</strong>
+                                <p style="margin-top: 8px;">The system automatically detects and handles various timestamp formats! You don't need to reformat your CSV files - the app intelligently parses:</p>
+                                <ul style="margin-top: 5px;">
+                                    <li>✓ Different date formats (ISO, US, EU styles)</li>
+                                    <li>✓ Mixed formats between solar and grid files</li>
+                                    <li>✓ Various separator styles (dash, slash, dot)</li>
+                                    <li>✓ 12-hour (AM/PM) or 24-hour time formats</li>
+                                </ul>
+                                <p style="margin-top: 8px;"><em>Just ensure your timestamps are consistent within each file and represent 15-minute intervals.</em></p>
                             </div>
                             
                             <h3 style="margin-top: 30px;">📊 Try Demo Data</h3>
@@ -400,7 +411,7 @@
                                             <ul>
                                                 <li>2 oszlop: <code>Időbélyeg, Termelés (kW)</code></li>
                                                 <li>15 perces felbontás</li>
-                                                <li>Rugalmas dátum formátumok elfogadva:
+                                                <li>Példa időbélyeg formátumok:
                                                     <ul>
                                                         <li><code>ÉÉÉÉ-HH-NN ÓÓ:pp</code> (pl. 2024-10-01 14:30)</li>
                                                         <li><code>H/N/ÉÉÉÉ Ó:pp</code> (pl. 1/1/2024 0:15)</li>
@@ -422,18 +433,29 @@
                                             <ul>
                                                 <li>3 oszlop: <code>Időbélyeg, Import (kWh), Export (kWh)</code></li>
                                                 <li>15 perces energia intervallumok</li>
-                                                <li>Rugalmas dátum formátumok (napelemes fájltól eltérhet):
+                                                <li>Példa időbélyeg formátumok:
                                                     <ul>
                                                         <li><code>ÉÉÉÉ-HH-NN ÓÓ:pp</code></li>
                                                         <li><code>H/N/ÉÉÉÉ Ó:pp</code></li>
                                                         <li><code>ÉÉÉÉ.HH.NN. ÓÓ:pp</code></li>
                                                     </ul>
                                                 </li>
-                                                <li>Megjegyzés: Az időbélyegek formátuma nem kell egyezzen a napelemes fájléval</li>
                                             </ul>
                                         </div>
                                     </div>
                                 </div>
+                            </div>
+                            
+                            <div class="info-box" style="margin-top: 30px; background: rgba(59, 130, 246, 0.1); border-left: 3px solid #3b82f6;">
+                                <strong>⏰ Univerzális időbélyeg kezelés</strong>
+                                <p style="margin-top: 8px;">A rendszer automatikusan felismeri és kezeli a különböző időbélyeg formátumokat! Nem kell átformáznod a CSV fájljaidat - az alkalmazás intelligensen értelmezi:</p>
+                                <ul style="margin-top: 5px;">
+                                    <li>✓ Különböző dátum formátumokat (ISO, US, EU stílusok)</li>
+                                    <li>✓ Eltérő formátumokat napelemes és hálózati fájlok között</li>
+                                    <li>✓ Különféle elválasztó stílusokat (kötőjel, per jel, pont)</li>
+                                    <li>✓ 12 órás (AM/PM) vagy 24 órás időformátumokat</li>
+                                </ul>
+                                <p style="margin-top: 8px;"><em>Csak azt kell biztosítanod, hogy az időbélyegek konzisztensek legyenek az egyes fájlokon belül és 15 perces intervallumokat reprezentáljanak.</em></p>
                             </div>
                             
                             <h3 style="margin-top: 30px;">📊 Példa adatok kipróbálása</h3>
