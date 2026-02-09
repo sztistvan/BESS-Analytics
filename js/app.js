@@ -213,6 +213,43 @@ const App = {
         if (aggFlowMonthly) {
             aggFlowMonthly.addEventListener('click', () => this.setFlowAggregation('monthly'));
         }
+
+        // Listen for Yearly Analysis events
+        const btnCalculateYearlyAnalysis = document.getElementById('btnCalculateYearlyAnalysis');
+        if (btnCalculateYearlyAnalysis) {
+            console.log('Yearly Analysis button found, attaching event listener');
+            btnCalculateYearlyAnalysis.addEventListener('click', () => {
+                console.log('Yearly Analysis button clicked');
+                const year = parseInt(document.getElementById('yearSelect').value);
+                const capacity = parseFloat(document.getElementById('yearlyBatteryCapacity').value);
+                
+                console.log('Year:', year, 'Capacity:', capacity);
+                
+                if (!year || isNaN(capacity) || capacity <= 0) {
+                    alert('Please select a valid year and enter a positive battery capacity.');
+                    return;
+                }
+                
+                YearlyAnalysis.runYearlyAnalysis(year, capacity, this.mergedData);
+            });
+        } else {
+            console.error('Yearly Analysis button NOT found!');
+        }
+
+        const btnToggleFinancials = document.getElementById('btnToggleFinancials');
+        if (btnToggleFinancials) {
+            btnToggleFinancials.addEventListener('click', () => YearlyAnalysis.toggleFinancials());
+        }
+
+        const btnCopyMonthlyData = document.getElementById('btnCopyMonthlyData');
+        if (btnCopyMonthlyData) {
+            btnCopyMonthlyData.addEventListener('click', () => YearlyAnalysis.exportToClipboard());
+        }
+
+        const btnDownloadMonthlyCSV = document.getElementById('btnDownloadMonthlyCSV');
+        if (btnDownloadMonthlyCSV) {
+            btnDownloadMonthlyCSV.addEventListener('click', () => YearlyAnalysis.exportToCSV());
+        }
     },
 
     /**
@@ -576,6 +613,10 @@ const App = {
             // Initial render with the full range detected
             this.filterAndRender();
             console.log("Data merged and visualized.");
+            
+            // Populate year dropdown for yearly analysis
+            console.log("Calling YearlyAnalysis.populateYearDropdown...");
+            YearlyAnalysis.populateYearDropdown(this.mergedData);
         }
     },
 

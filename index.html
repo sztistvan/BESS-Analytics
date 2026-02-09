@@ -285,6 +285,88 @@
                 <!-- Chart Container -->
                 <div id="optimizationCurveContainer" style="height: 600px; width: 100%;"></div>
             </div>
+
+            <!-- Solar Self-Consumption Analysis Section -->
+            <section id="yearlyAnalysisSection" class="yearly-analysis-section" style="display: none;">
+                <h2>Solar Self-Consumption Analysis</h2>
+                <p class="section-description">Analyze monthly and yearly solar self-consumption with battery storage simulation. Select a year with complete data and specify battery capacity.</p>
+                
+                <div class="yearly-controls">
+                    <div class="config-item">
+                        <label for="yearSelect">Year:</label>
+                        <select id="yearSelect">
+                            <option value="">-- Select Year --</option>
+                        </select>
+                    </div>
+                    
+                    <div class="config-item">
+                        <label for="yearlyBatteryCapacity">Battery Capacity (kWh):</label>
+                        <input type="number" id="yearlyBatteryCapacity" value="10" min="0" max="200" step="1">
+                    </div>
+                    
+                    <button id="btnCalculateYearlyAnalysis" class="calculate-btn">
+                        <span class="icon">📊</span> Calculate Analysis
+                    </button>
+                </div>
+                
+                <!-- Summary KPI Cards -->
+                <div id="yearlySummaryCards" class="kpi-cards-container" style="display: none;">
+                    <div class="result-card">
+                        <h3>Solar Self-Consumption (No Battery)</h3>
+                        <div id="yearlySelfConsumptionBefore" class="kpi-value">-- kWh (--)</div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <h3>Solar Self-Consumption (With Battery)</h3>
+                        <div id="yearlySelfConsumptionAfter" class="kpi-value">-- kWh (--)</div>
+                    </div>
+                    
+                    <div class="result-card">
+                        <h3>Grid Export Reduction</h3>
+                        <div id="yearlyGridExportReduction" class="kpi-value">-- kWh (--)</div>
+                    </div>
+                </div>
+                
+                <!-- Monthly Breakdown Section -->
+                <div id="monthlyBreakdownContainer" style="display: none;">
+                    <h3>Monthly Breakdown</h3>
+                    
+                    <div class="export-controls">
+                        <button id="btnToggleFinancials" class="toggle-btn" title="Show/Hide Financial Data">
+                            💰 Toggle Financial Data
+                        </button>
+                        <button id="btnCopyMonthlyData" class="export-btn">
+                            📋 Copy to Clipboard
+                        </button>
+                        <button id="btnDownloadMonthlyCSV" class="export-btn">
+                            📥 Download CSV
+                        </button>
+                    </div>
+                    
+                    <div class="table-wrapper">
+                        <table id="monthlyBreakdownTable" class="monthly-table">
+                            <thead>
+                                <tr>
+                                    <th>MONTH</th>
+                                    <th>SOLAR SELF-CONSUMPTION (NO BATTERY)</th>
+                                    <th>SOLAR SELF-CONSUMPTION (WITH BATTERY)</th>
+                                    <th>GRID EXPORT REDUCTION</th>
+                                    <th class="financial-col" style="display: none;">BASELINE COST</th>
+                                    <th class="financial-col" style="display: none;">WITHBATTERY COST</th>
+                                    <th class="financial-col" style="display: none;">TOTAL SAVINGS</th>
+                                </tr>
+                            </thead>
+                            <tbody id="monthlyTableBody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Charts -->
+                    <div id="yearlyChartAbsolute" style="height: 600px; width: 100%; margin-top: 20px;"></div>
+                    <div id="yearlyChartPercentage" style="height: 600px; width: 100%; margin-top: 20px;"></div>
+                </div>
+            </section>
         </div>
 
         <div id="output" style="margin-top: 20px; white-space: pre-wrap; font-family: monospace; font-size: 12px; background: #f4f4f4; padding: 10px;">
@@ -325,6 +407,10 @@
                     <button class="tab-btn" data-section="simulation">
                         <span class="tab-text-en">Simulation</span>
                         <span class="tab-text-hu" style="display:none;">Szimuláció</span>
+                    </button>
+                    <button class="tab-btn" data-section="yearly-analysis">
+                        <span class="tab-text-en">Yearly Analysis</span>
+                        <span class="tab-text-hu" style="display:none;">Éves Elemzés</span>
                     </button>
                     <button class="tab-btn" data-section="concepts">
                         <span class="tab-text-en">Key Concepts</span>
@@ -882,7 +968,116 @@
                         </div>
                     </div>
                     
-                    <!-- Section 5: Key Concepts -->
+                    <!-- Section 5: Solar Self-Consumption Analysis -->
+                    <div id="section-yearly-analysis" class="help-section" style="display:none;">
+                        <div class="lang-en">
+                            <h3>📊 Solar Self-Consumption Analysis</h3>
+                            <p>Analyze yearly solar self-consumption performance with monthly breakdowns for complete calendar years.</p>
+                            
+                            <h4>How to Use</h4>
+                            <ol>
+                                <li><strong>Select Year:</strong> Choose from available years in your loaded data (dropdown auto-populated)</li>
+                                <li><strong>Set Battery Capacity:</strong> Enter desired capacity in kWh (1-200 kWh range)</li>
+                                <li><strong>Calculate Analysis:</strong> Click "📊 Calculate Analysis" to run full year simulation</li>
+                            </ol>
+                            
+                            <h4>Summary Cards</h4>
+                            <p>Three KPI cards display yearly totals:</p>
+                            <ul>
+                                <li><strong>Solar Self-Consumption (No Battery):</strong> How much solar you use directly without battery</li>
+                                <li><strong>Solar Self-Consumption (With Battery):</strong> How much solar you use with battery storage</li>
+                                <li><strong>Grid Export Reduction:</strong> How much less energy you export to grid with battery</li>
+                            </ul>
+                            
+                            <h4>Monthly Breakdown Table</h4>
+                            <p>Detailed table showing all 12 months plus TOTAL row with:</p>
+                            <ul>
+                                <li>Monthly self-consumption rates (kWh and %)</li>
+                                <li>Grid export reduction per month</li>
+                                <li>Optional financial data (toggle with 💰 button)</li>
+                            </ul>
+                            
+                            <h4>Export Options</h4>
+                            <ul>
+                                <li><strong>📋 Copy to Clipboard:</strong> TSV format, ready to paste into Excel/Google Sheets</li>
+                                <li><strong>📥 Download CSV:</strong> Complete CSV file with metadata and yearly summary</li>
+                                <li>Filename format: <code>solar_self_consumption_analysis_2025_10kWh_2026-02-09.csv</code></li>
+                            </ul>
+                            
+                            <h4>Charts</h4>
+                            <p>Two interactive visualizations:</p>
+                            <ul>
+                                <li><strong>Absolute Chart:</strong> Monthly energy values in kWh</li>
+                                <li><strong>Percentage Chart:</strong> Monthly performance as percentages (0-100%)</li>
+                                <li>Three bar groups per month: Before (orange), After (green), Reduction (blue)</li>
+                            </ul>
+                            
+                            <div class="info-box">
+                                <strong>💡 Important Notes:</strong>
+                                <ul>
+                                    <li>Only battery capacity is configured in this section</li>
+                                    <li>All other battery parameters (efficiency, charge rates, SOC limits, inverter mode, pricing) are inherited from the main Battery Configuration panel</li>
+                                    <li>Analysis requires complete year data (Jan 1 - Dec 31)</li>
+                                    <li>Financial toggle shows/hides cost and savings columns</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="lang-hu" style="display:none;">
+                            <h3>📊 Napenergia Önfogyasztás Elemzés</h3>
+                            <p>Éves napenergia önfogyasztási teljesítmény elemzése havi bontással teljes naptári évekre.</p>
+                            
+                            <h4>Használat</h4>
+                            <ol>
+                                <li><strong>Év kiválasztása:</strong> Válasszon a betöltött adatokban elérhető évek közül (legördülő menü automatikusan feltöltődik)</li>
+                                <li><strong>Akkumulátor kapacitás:</strong> Adja meg a kívánt kapacitást kWh-ban (1-200 kWh tartomány)</li>
+                                <li><strong>Elemzés számítása:</strong> Kattintson a "📊 Calculate Analysis" gombra a teljes éves szimuláció futtatásához</li>
+                            </ol>
+                            
+                            <h4>Összefoglaló Kártyák</h4>
+                            <p>Három KPI kártya jeleníti meg az éves összesítőket:</p>
+                            <ul>
+                                <li><strong>Napenergia önfogyasztás (Akkumulátor nélkül):</strong> Mennyit használ fel közvetlenül a napenergiából akkumulátor nélkül</li>
+                                <li><strong>Napenergia önfogyasztás (Akkumulátorral):</strong> Mennyit használ fel a napenergiából akkumulátoros tárolással</li>
+                                <li><strong>Hálózati export csökkenés:</strong> Mennyivel kevesebb energiát exportál a hálózatba akkumulátorral</li>
+                            </ul>
+                            
+                            <h4>Havi Bontás Táblázat</h4>
+                            <p>Részletes táblázat mind a 12 hónappal és ÖSSZESEN sorral:</p>
+                            <ul>
+                                <li>Havi önfogyasztási arányok (kWh és %)</li>
+                                <li>Hálózati export csökkenés havonta</li>
+                                <li>Opcionális pénzügyi adatok (kapcsoló: 💰 gomb)</li>
+                            </ul>
+                            
+                            <h4>Export Lehetőségek</h4>
+                            <ul>
+                                <li><strong>📋 Vágólapra másolás:</strong> TSV formátum, közvetlenül beilleszthető Excel/Google Sheets-be</li>
+                                <li><strong>📥 CSV letöltés:</strong> Teljes CSV fájl metaadatokkal és éves összesítéssel</li>
+                                <li>Fájlnév formátum: <code>solar_self_consumption_analysis_2025_10kWh_2026-02-09.csv</code></li>
+                            </ul>
+                            
+                            <h4>Grafikonok</h4>
+                            <p>Két interaktív vizualizáció:</p>
+                            <ul>
+                                <li><strong>Abszolút grafikon:</strong> Havi energia értékek kWh-ban</li>
+                                <li><strong>Százalékos grafikon:</strong> Havi teljesítmény százalékban (0-100%)</li>
+                                <li>Három oszlopcsoport havonta: Előtte (narancssárga), Utána (zöld), Csökkenés (kék)</li>
+                            </ul>
+                            
+                            <div class="info-box">
+                                <strong>💡 Fontos megjegyzések:</strong>
+                                <ul>
+                                    <li>Ebben a részben csak az akkumulátor kapacitás állítható</li>
+                                    <li>Minden más akkumulátor paraméter (hatékonyság, töltési sebesség, SOC határok, inverter mód, árazás) a fő Akkumulátor Konfiguráció panelből öröklődik</li>
+                                    <li>Az elemzés teljes év adatokat igényel (jan. 1 - dec. 31)</li>
+                                    <li>A pénzügyi kapcsoló megjeleníti/elrejti a költség és megtakarítás oszlopokat</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Section 6: Key Concepts -->
                     <div id="section-concepts" class="help-section" style="display:none;">
                         <div class="lang-en">
                             <h3>🔋 Inverter Mode: Symmetric vs Asymmetric</h3>
@@ -1231,7 +1426,7 @@
                         </div>
                     </div>
                     
-                    <!-- Section 6: Troubleshooting -->
+                    <!-- Section 7: Troubleshooting -->
                     <div id="section-troubleshoot" class="help-section" style="display:none;">
                         <div class="lang-en">
                             <h3>❓ Common Issues & Solutions</h3>
@@ -1428,6 +1623,7 @@
     <script src="js/data_merger.js"></script>
     <script src="js/visualizer.js"></script>
     <script src="js/simulation.js"></script>
+    <script src="js/yearly_analysis.js"></script>
     <script src="js/help_modal.js"></script>
     <script src="js/app.js"></script>
     <script>
