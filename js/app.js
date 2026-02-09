@@ -16,9 +16,16 @@ const App = {
     currentSimulationResults: null,
     // Track if energy flow toggle listeners are attached
     energyFlowListenersAttached: false,
+    // Track if overview toggle listeners are attached
+    overviewListenersAttached: false,
     // Store optimization results for CSV export
     optimizationResults: null,
     optimizationMetricType: 'import', // 'import' | 'export'
+    // Time aggregation state for each chart
+    currentAggregationOverview: '15min',  // Options: '15min', 'daily', 'monthly'
+    currentAggregationFlow: '15min',      // Options: '15min', 'daily', 'monthly'
+    currentViewModeOverview: 'energy',    // Track for smart aggregation: 'power' | 'energy'
+    currentViewModeFlow: 'energy',        // Track for smart aggregation: 'power' | 'energy'
 
     /**
      * Format number with space as thousand separator
@@ -32,6 +39,55 @@ const App = {
         // Add space as thousand separator
         parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
         return parts.join('.');
+    },
+
+    /**
+     * Get aggregated data based on aggregation level and view mode
+     * @param {Array} data - Source data to aggregate
+     * @param {string} aggregationLevel - '15min', 'daily', or 'monthly'
+     * @param {string} viewMode - 'power' or 'energy'
+     * @returns {Array} Aggregated data or original data if no aggregation
+     */
+    getAggregatedData(data, aggregationLevel, viewMode) {
+        if (!data || data.length === 0 || aggregationLevel === '15min') {
+            return data; // No aggregation needed
+        }
+
+        // Aggregation only works in energy mode
+        if (viewMode === 'power') {
+            console.warn('Aggregation not supported in power mode, returning original data');
+            return data;
+        }
+
+        // For aggregation in energy mode, convert solar kW to kWh first (multiply by 0.25 for 15-min intervals)
+        const dataWithEnergy = data.map(d => ({
+            ...d,
+            productionKwh: d.productionKw * 0.25  // Convert 15-min kW reading to kWh
+        }));
+
+        // For energy mode: sum all energy fields, average battery SOC
+        const fields = {
+            sum: ['importKwh', 'exportKwh', 'productionKwh', 'gridImportWithBattery', 'gridExportWithBattery'],
+            average: ['batterySocPercent', 'batterySocKwh']
+        };
+
+        // Apply aggregation
+        let aggregated;
+        if (aggregationLevel === 'daily') {
+            aggregated = DataMerger.aggregateDataToDaily(dataWithEnergy, fields);
+        } else if (aggregationLevel === 'monthly') {
+            aggregated = DataMerger.aggregateDataToMonthly(dataWithEnergy, fields);
+        } else {
+            return data;
+        }
+
+        // For aggregated data, productionKw field should contain the summed kWh
+        aggregated = aggregated.map(d => ({
+            ...d,
+            productionKw: d.productionKwh || 0  // Use summed kWh value in productionKw field
+        }));
+
+        return aggregated;
     },
 
     /**
@@ -128,6 +184,34 @@ const App = {
         const btnLoadDemo = document.getElementById('loadDemoBtn');
         if (btnLoadDemo) {
             btnLoadDemo.addEventListener('click', () => this.loadDemoScenarios());
+        }
+
+        // Listen for Energy Data Overview - Time Aggregation Controls
+        const aggOverview15min = document.getElementById('agg-overview-15min');
+        const aggOverviewDaily = document.getElementById('agg-overview-daily');
+        const aggOverviewMonthly = document.getElementById('agg-overview-monthly');
+        if (aggOverview15min) {
+            aggOverview15min.addEventListener('click', () => this.setOverviewAggregation('15min'));
+        }
+        if (aggOverviewDaily) {
+            aggOverviewDaily.addEventListener('click', () => this.setOverviewAggregation('daily'));
+        }
+        if (aggOverviewMonthly) {
+            aggOverviewMonthly.addEventListener('click', () => this.setOverviewAggregation('monthly'));
+        }
+
+        // Listen for Energy Flow - Time Aggregation Controls
+        const aggFlow15min = document.getElementById('agg-flow-15min');
+        const aggFlowDaily = document.getElementById('agg-flow-daily');
+        const aggFlowMonthly = document.getElementById('agg-flow-monthly');
+        if (aggFlow15min) {
+            aggFlow15min.addEventListener('click', () => this.setFlowAggregation('15min'));
+        }
+        if (aggFlowDaily) {
+            aggFlowDaily.addEventListener('click', () => this.setFlowAggregation('daily'));
+        }
+        if (aggFlowMonthly) {
+            aggFlowMonthly.addEventListener('click', () => this.setFlowAggregation('monthly'));
         }
     },
 
@@ -292,6 +376,77 @@ const App = {
         } else {
             // Apply current preset from the end
             this.applyPreset(currentPreset);
+        }
+    },
+
+    /**
+     * Set aggregation level for Energy Data Overview chart
+     * @param {string} level - '15min', 'daily', or 'monthly'
+     */
+    setOverviewAggregation(level) {
+        // Only allow aggregation in energy mode
+        if (this.currentViewModeOverview === 'power' && level !== '15min') {
+            console.warn('Aggregation only available in energy mode');
+            return;
+        }
+
+        // Update state
+        this.currentAggregationOverview = level;
+
+        // Update button active states
+        document.querySelectorAll('#agg-overview-15min, #agg-overview-daily, #agg-overview-monthly')
+            .forEach(btn => btn.classList.remove('active'));
+        const targetBtn = document.getElementById(`agg-overview-${level}`);
+        if (targetBtn) {
+            targetBtn.classList.add('active');
+        }
+
+        // Re-render chart if data exists
+        if (this.mergedData && this.mergedData.length > 0) {
+            const filteredData = this.getFilteredData();
+            Visualizer.renderChart(filteredData, level, this.currentViewModeOverview);
+        }
+    },
+
+    /**
+     * Set aggregation level for Energy Flow chart
+     * @param {string} level - '15min', 'daily', or 'monthly'
+     */
+    setFlowAggregation(level) {
+        // Only allow aggregation in energy mode
+        if (this.currentViewModeFlow === 'power' && level !== '15min') {
+            console.warn('Aggregation only available in energy mode');
+            return;
+        }
+
+        // Update state
+        this.currentAggregationFlow = level;
+
+        // Update button active states
+        document.querySelectorAll('#agg-flow-15min, #agg-flow-daily, #agg-flow-monthly')
+            .forEach(btn => btn.classList.remove('active'));
+        const targetBtn = document.getElementById(`agg-flow-${level}`);
+        if (targetBtn) {
+            targetBtn.classList.add('active');
+        }
+
+        // Re-render chart if simulation results exist
+        if (this.currentSimulationResults) {
+            const startTimestamp = new Date(this.simulationStartDate).getTime();
+            const endTimestamp = new Date(this.simulationEndDate).getTime();
+
+            const filteredData = this.mergedData.filter(row => {
+                return row.timestampMs >= startTimestamp && row.timestampMs <= endTimestamp;
+            });
+
+            Visualizer.renderEnergyFlowChart(
+                this.currentSimulationResults.simulatedData,
+                this.simulationStartDate,
+                this.simulationEndDate,
+                filteredData,
+                this.currentViewModeFlow,
+                level
+            );
         }
     },
 
@@ -484,8 +639,13 @@ const App = {
         const endInput = document.getElementById('endDate').value;
 
         if (!startInput || !endInput) {
-            Visualizer.renderChart(this.mergedData);
+            Visualizer.renderChart(this.mergedData, this.currentAggregationOverview, this.currentViewModeOverview);
             this.updateDataStatus(this.mergedData.length);
+            // Setup overview toggle listeners (only once)
+            if (!this.overviewListenersAttached) {
+                this.setupOverviewToggleListeners();
+                this.overviewListenersAttached = true;
+            }
             return;
         }
 
@@ -504,13 +664,42 @@ const App = {
         console.log(`Filtered results: ${filtered.length} points.`);
 
         if (filtered.length > 0) {
-            Visualizer.renderChart(filtered);
+            Visualizer.renderChart(filtered, this.currentAggregationOverview, this.currentViewModeOverview);
             this.updateDataStatus(filtered.length, startInput, endInput);
+            // Setup overview toggle listeners (only once)
+            if (!this.overviewListenersAttached) {
+                this.setupOverviewToggleListeners();
+                this.overviewListenersAttached = true;
+            }
         } else {
             console.error("Zero points found in range.");
             document.getElementById('output').textContent = "Warning: No data in this range.";
             this.updateDataStatus(0);
         }
+    },
+
+    /**
+     * Get filtered data based on current date range selection
+     * @returns {Array} Filtered data array
+     */
+    getFilteredData() {
+        if (!this.mergedData || this.mergedData.length === 0) {
+            return [];
+        }
+
+        const startInput = document.getElementById('startDate').value;
+        const endInput = document.getElementById('endDate').value;
+
+        if (!startInput || !endInput) {
+            return this.mergedData;
+        }
+
+        const startTimestamp = new Date(startInput).getTime();
+        const endTimestamp = new Date(endInput).getTime();
+
+        return this.mergedData.filter(row => {
+            return row.timestampMs >= startTimestamp && row.timestampMs <= endTimestamp;
+        });
     },
 
     /**
@@ -780,13 +969,14 @@ const App = {
         const energyBtn = document.getElementById('btnEnergyFlowEnergy');
         const viewType = energyBtn && energyBtn.classList.contains('active') ? 'energy' : 'power';
 
-        // Render chart
+        // Render chart with current aggregation level
         Visualizer.renderEnergyFlowChart(
             simulatedData,
             this.simulationStartDate,
             this.simulationEndDate,
             originalData,
-            viewType
+            viewType,
+            this.currentAggregationFlow
         );
 
         // Show container
@@ -827,6 +1017,16 @@ const App = {
      * @param {String} viewType - 'power' or 'energy'
      */
     toggleEnergyFlowView(viewType) {
+        // Preserve current zoom state BEFORE any changes
+        const chartDiv = document.getElementById('energyFlowChartContainer');
+        let currentXRange = null;
+        if (chartDiv && chartDiv.layout && chartDiv.layout.xaxis && chartDiv.layout.xaxis.range) {
+            currentXRange = chartDiv.layout.xaxis.range.slice(); // Copy the range
+        }
+
+        // Update view mode state
+        this.currentViewModeFlow = viewType;
+
         // Update button styles
         const powerBtn = document.getElementById('btnEnergyFlowPower');
         const energyBtn = document.getElementById('btnEnergyFlowEnergy');
@@ -834,9 +1034,21 @@ const App = {
         if (viewType === 'power') {
             powerBtn.classList.add('active');
             energyBtn.classList.remove('active');
+            // Force 15min mode and disable daily/monthly buttons
+            this.currentAggregationFlow = '15min';
+            // Update aggregation button states manually (don't call setFlowAggregation to avoid double render)
+            document.querySelectorAll('#agg-flow-15min, #agg-flow-daily, #agg-flow-monthly')
+                .forEach(btn => btn.classList.remove('active'));
+            document.getElementById('agg-flow-15min').classList.add('active');
+            // Disable daily/monthly buttons
+            document.getElementById('agg-flow-daily').disabled = true;
+            document.getElementById('agg-flow-monthly').disabled = true;
         } else {
             energyBtn.classList.add('active');
             powerBtn.classList.remove('active');
+            // Enable daily/monthly buttons
+            document.getElementById('agg-flow-daily').disabled = false;
+            document.getElementById('agg-flow-monthly').disabled = false;
         }
 
         // Re-render chart if simulation exists
@@ -853,8 +1065,89 @@ const App = {
                 this.simulationStartDate,
                 this.simulationEndDate,
                 filteredData,
-                viewType
+                viewType,
+                this.currentAggregationFlow
             );
+
+            // Restore zoom state after rendering
+            if (currentXRange) {
+                Plotly.relayout('energyFlowChartContainer', {
+                    'xaxis.range': currentXRange
+                });
+            }
+        }
+    },
+
+    /**
+     * Setup event listeners for overview chart toggle buttons
+     */
+    setupOverviewToggleListeners() {
+        const powerBtn = document.getElementById('btnShowPower');
+        const energyBtn = document.getElementById('btnShowEnergy');
+
+        if (powerBtn) {
+            powerBtn.addEventListener('click', () => {
+                this.toggleOverviewView('power');
+            });
+        }
+
+        if (energyBtn) {
+            energyBtn.addEventListener('click', () => {
+                this.toggleOverviewView('energy');
+            });
+        }
+    },
+
+    /**
+     * Toggle overview chart view between power and energy
+     * @param {String} viewType - 'power' or 'energy'
+     */
+    toggleOverviewView(viewType) {
+        // Preserve current zoom state BEFORE any changes
+        const chartDiv = document.getElementById('chartContainer');
+        let currentXRange = null;
+        if (chartDiv && chartDiv.layout && chartDiv.layout.xaxis && chartDiv.layout.xaxis.range) {
+            currentXRange = chartDiv.layout.xaxis.range.slice(); // Copy the range
+        }
+
+        // Update view mode state
+        this.currentViewModeOverview = viewType;
+
+        // Update button styles
+        const powerBtn = document.getElementById('btnShowPower');
+        const energyBtn = document.getElementById('btnShowEnergy');
+
+        if (viewType === 'power') {
+            powerBtn.classList.add('active');
+            energyBtn.classList.remove('active');
+            // Force 15min mode and disable daily/monthly buttons
+            this.currentAggregationOverview = '15min';
+            // Update aggregation button states manually (don't call setOverviewAggregation to avoid double render)
+            document.querySelectorAll('#agg-overview-15min, #agg-overview-daily, #agg-overview-monthly')
+                .forEach(btn => btn.classList.remove('active'));
+            document.getElementById('agg-overview-15min').classList.add('active');
+            // Disable daily/monthly buttons
+            document.getElementById('agg-overview-daily').disabled = true;
+            document.getElementById('agg-overview-monthly').disabled = true;
+        } else {
+            energyBtn.classList.add('active');
+            powerBtn.classList.remove('active');
+            // Enable daily/monthly buttons
+            document.getElementById('agg-overview-daily').disabled = false;
+            document.getElementById('agg-overview-monthly').disabled = false;
+        }
+
+        // Re-render chart if data exists
+        if (this.mergedData && this.mergedData.length > 0) {
+            const filteredData = this.getFilteredData();
+            Visualizer.renderChart(filteredData, this.currentAggregationOverview, viewType);
+
+            // Restore zoom state after rendering
+            if (currentXRange) {
+                Plotly.relayout('chartContainer', {
+                    'xaxis.range': currentXRange
+                });
+            }
         }
     },
 

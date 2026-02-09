@@ -6,32 +6,62 @@ const Visualizer = {
     /**
      * Renders an interactive time-series chart.
      * @param {Array} data - The merged dataset.
+     * @param {string} aggregationLevel - '15min', 'daily', or 'monthly'
+     * @param {string} viewMode - 'power' or 'energy'
      */
-    renderChart(data) {
+    renderChart(data, aggregationLevel = '15min', viewMode = 'energy') {
         document.getElementById('chartContainer').style.display = 'block';
 
-        const timestamps = data.map(d => d.timestamp);
+        // Apply aggregation
+        const aggregatedData = App.getAggregatedData(data, aggregationLevel, viewMode);
+
+        const timestamps = aggregatedData.map(d => d.timestamp);
         
         // Prepare base data
-        const solarPower = data.map(d => d.productionKw);
-        const solarEnergy = data.map(d => d.productionKw * 0.25); // 15 min -> 0.25h
-        const importData = data.map(d => d.importKwh);
-        const exportData = data.map(d => d.exportKwh);
+        const solarPower = aggregatedData.map(d => d.productionKw);
+        // For energy mode: convert kW to kWh for 15min data (multiply by 0.25), aggregated data already has kWh
+        const solarEnergy = aggregatedData.map(d => aggregationLevel === '15min' ? d.productionKw * 0.25 : d.productionKw);
+        const importData = aggregatedData.map(d => d.importKwh);
+        const exportData = aggregatedData.map(d => d.exportKwh);
 
-        // Solar trace shows Power (kW) by default, but can switch to Energy (kWh) with buttons
-        const solarTrace = {
+        // Determine which data to show based on view mode
+        const solarData = viewMode === 'power' ? solarPower : solarEnergy;
+        const solarName = viewMode === 'power' ? 'Solar Production (kW)' : 'Solar Energy (kWh)';
+        const solarUnit = viewMode === 'power' ? 'kW' : 'kWh';
+        const yAxisTitle = viewMode === 'power' ? 'Power (kW) / Energy (kWh)' : 'Energy (kWh)';
+
+        // Use bar chart for aggregated data, line chart for 15min
+        // Power mode is always 15min (not aggregated)
+        const isAggregated = aggregationLevel !== '15min' && viewMode === 'energy';
+
+        // Solar trace
+        const solarTrace = isAggregated ? {
             x: timestamps,
-            y: solarEnergy,
-            name: 'Solar Energy (kWh)',
+            y: solarData,
+            name: solarName,
+            type: 'bar',
+            marker: { color: '#fbbf24' },
+            hovertemplate: `<b>${solarName}</b><br>%{y:.2f} ${solarUnit}<extra></extra>`
+        } : {
+            x: timestamps,
+            y: solarData,
+            name: solarName,
             type: 'scatter',
             mode: 'lines',
             line: { color: '#fbbf24', width: 2 },
             fill: 'tozeroy',
             fillcolor: 'rgba(226, 203, 128, 0.2)',
-            hovertemplate: '<b>Solar Energy</b><br>%{y:.2f} kWh<extra></extra>'
+            hovertemplate: `<b>${solarName}</b><br>%{y:.2f} ${solarUnit}<extra></extra>`
         };
 
-        const importTrace = {
+        const importTrace = isAggregated ? {
+            x: timestamps,
+            y: importData,
+            name: 'Grid Import (kWh)',
+            type: 'bar',
+            marker: { color: '#3b82f6' },
+            hovertemplate: '<b>Grid Import</b><br>%{y:.2f} kWh<extra></extra>'
+        } : {
             x: timestamps,
             y: importData,
             name: 'Grid Import (kWh)',
@@ -41,7 +71,14 @@ const Visualizer = {
             hovertemplate: '<b>Grid Import</b><br>%{y:.2f} kWh<extra></extra>'
         };
 
-        const exportTrace = {
+        const exportTrace = isAggregated ? {
+            x: timestamps,
+            y: exportData,
+            name: 'Grid Export (kWh)',
+            type: 'bar',
+            marker: { color: '#10b981' },
+            hovertemplate: '<b>Grid Export</b><br>%{y:.2f} kWh<extra></extra>'
+        } : {
             x: timestamps,
             y: exportData,
             name: 'Grid Export (kWh)',
@@ -60,16 +97,20 @@ const Visualizer = {
             plot_bgcolor: 'rgba(0,0,0,0)',
             template: 'plotly_dark',
             xaxis: { 
-                title: 'Time', 
+                title: {
+                    text: 'Time',
+                    font: { color: '#e6edf3' }
+                },
                 gridcolor: '#495057',
-                tickfont: { color: '#cbd5e1' },
-                title: { font: { color: '#e6edf3' } }
+                tickfont: { color: '#cbd5e1' }
             },
             yaxis: { 
-                title: 'Energy (kWh)',
+                title: {
+                    text: yAxisTitle,
+                    font: { color: '#e6edf3' }
+                },
                 gridcolor: '#495057',
-                tickfont: { color: '#cbd5e1' },
-                title: { font: { color: '#e6edf3' } }
+                tickfont: { color: '#cbd5e1' }
             },
             legend: {
                 font: { color: '#cbd5e1' }
@@ -87,54 +128,24 @@ const Visualizer = {
             }
         };
 
+        // Add tick format for aggregated data
+        if (aggregationLevel === 'daily') {
+            layout.xaxis.tickformat = '%Y-%m-%d';
+        } else if (aggregationLevel === 'monthly') {
+            layout.xaxis.tickformat = '%Y-%m';
+        }
+
+        // Add barmode for aggregated data
+        if (isAggregated) {
+            layout.barmode = 'group';
+        }
+
         const config = { responsive: true };
 
-        Plotly.newPlot('chartContainer', [solarTrace, importTrace, exportTrace], layout, config);
+        Plotly.react('chartContainer', [solarTrace, importTrace, exportTrace], layout, config);
 
         // Show custom toggle buttons
         document.getElementById('viewToggleContainer').style.display = 'block';
-
-        // Custom button handlers for view switching
-        const btnPower = document.getElementById('btnShowPower');
-        const btnEnergy = document.getElementById('btnShowEnergy');
-
-        btnPower.addEventListener('click', function() {
-            Plotly.update('chartContainer', 
-                {
-                    'y': [solarPower, importData, exportData],
-                    'name': ['Solar Production (kW)', 'Grid Import (kWh)', 'Grid Export (kWh)'],
-                    'hovertemplate': [
-                        '<b>Solar Power</b><br>%{y:.2f} kW<extra></extra>',
-                        '<b>Grid Import</b><br>%{y:.2f} kWh<extra></extra>',
-                        '<b>Grid Export</b><br>%{y:.2f} kWh<extra></extra>'
-                    ]
-                },
-                {
-                    'yaxis.title.text': 'Power (kW) / Energy (kWh)'
-                }
-            );
-            btnPower.classList.add('active');
-            btnEnergy.classList.remove('active');
-        });
-
-        btnEnergy.addEventListener('click', function() {
-            Plotly.update('chartContainer',
-                {
-                    'y': [solarEnergy, importData, exportData],
-                    'name': ['Solar Energy (kWh)', 'Grid Import (kWh)', 'Grid Export (kWh)'],
-                    'hovertemplate': [
-                        '<b>Solar Energy</b><br>%{y:.2f} kWh<extra></extra>',
-                        '<b>Grid Import</b><br>%{y:.2f} kWh<extra></extra>',
-                        '<b>Grid Export</b><br>%{y:.2f} kWh<extra></extra>'
-                    ]
-                },
-                {
-                    'yaxis.title.text': 'Energy (kWh)'
-                }
-            );
-            btnEnergy.classList.add('active');
-            btnPower.classList.remove('active');
-        });
     },
 
     /**
@@ -144,8 +155,9 @@ const Visualizer = {
      * @param {String} endDate - Simulation end date (ISO format)
      * @param {Array} originalData - The filtered original merged data
      * @param {String} viewType - 'power' or 'energy' (default: 'energy')
+     * @param {String} aggregationLevel - '15min', 'daily', or 'monthly'
      */
-    renderEnergyFlowChart(simulatedData, startDate, endDate, originalData, viewType = 'energy') {
+    renderEnergyFlowChart(simulatedData, startDate, endDate, originalData, viewType = 'energy', aggregationLevel = '15min') {
         // Filter data to exact simulation range
         const startMs = new Date(startDate).getTime();
         const endMs = new Date(endDate).getTime();
@@ -165,18 +177,36 @@ const Visualizer = {
             return;
         }
 
+        // Apply aggregation
+        const aggregatedSimData = App.getAggregatedData(filteredSimData, aggregationLevel, viewType);
+        const aggregatedOrigData = App.getAggregatedData(filteredOrigData, aggregationLevel, viewType);
+
         // Prepare solar data (only solar switches between kW and kWh)
-        const solarPower = filteredSimData.map(d => d.productionKw); // Already in kW
-        const solarEnergy = filteredSimData.map(d => d.productionKw * 0.25); // 15 min -> kWh
+        const solarPower = aggregatedSimData.map(d => d.productionKw);
+        // For aggregated data, productionKw already contains correct value based on view mode
+        // For 15min data, we still need to convert kW to kWh by multiplying by 0.25
+        const solarEnergy = aggregatedSimData.map(d => aggregationLevel === '15min' ? d.productionKw * 0.25 : d.productionKw);
         const solarData = viewType === 'power' ? solarPower : solarEnergy;
         const solarName = viewType === 'power' ? 'Solar Production (kW)' : 'Solar Energy (kWh)';
         const solarUnit = viewType === 'power' ? 'kW' : 'kWh';
         const yAxisTitle = viewType === 'power' ? 'Power (kW) / Energy (kWh)' : 'Energy (kWh)';
 
-        const timestamps = filteredSimData.map(d => d.timestamp);
+        const timestamps = aggregatedSimData.map(d => d.timestamp);
 
-        // Trace 1: Solar Production/Energy (area fill)
-        const solarTrace = {
+        // Use bar chart for aggregated data, line chart for 15min
+        // Power mode is always 15min (not aggregated)
+        const isAggregated = aggregationLevel !== '15min' && viewType === 'energy';
+
+        // Trace 1: Solar Production/Energy (area fill for 15min, bars for aggregated)
+        const solarTrace = isAggregated ? {
+            x: timestamps,
+            y: solarData,
+            name: solarName,
+            type: 'bar',
+            marker: { color: '#fbbf24' },
+            yaxis: 'y',
+            hovertemplate: `<b>Solar</b><br>%{y:.2f} ${solarUnit}<extra></extra>`
+        } : {
             x: timestamps,
             y: solarData,
             name: solarName,
@@ -190,9 +220,17 @@ const Visualizer = {
         };
 
         // Trace 2: Original Import (solid blue) - always kWh
-        const origImportTrace = {
+        const origImportTrace = isAggregated ? {
             x: timestamps,
-            y: filteredOrigData.map(d => d.importKwh),
+            y: aggregatedOrigData.map(d => d.importKwh),
+            name: 'Original Import (kWh)',
+            type: 'bar',
+            marker: { color: '#3b82f6' },
+            yaxis: 'y',
+            hovertemplate: '<b>Original Import</b><br>%{y:.2f} kWh<extra></extra>'
+        } : {
+            x: timestamps,
+            y: aggregatedOrigData.map(d => d.importKwh),
             name: 'Original Import (kWh)',
             type: 'scatter',
             mode: 'lines',
@@ -201,10 +239,18 @@ const Visualizer = {
             hovertemplate: '<b>Original Import</b><br>%{y:.2f} kWh<extra></extra>'
         };
 
-        // Trace 3: New Import (dashed light blue) - always kWh
-        const newImportTrace = {
+        // Trace 3: New Import (dashed/lighter for bars) - always kWh
+        const newImportTrace = isAggregated ? {
             x: timestamps,
-            y: filteredSimData.map(d => d.gridImportWithBattery),
+            y: aggregatedSimData.map(d => d.gridImportWithBattery),
+            name: 'Optimized Import (kWh)',
+            type: 'bar',
+            marker: { color: '#93c5fd' },
+            yaxis: 'y',
+            hovertemplate: '<b>Optimized Import</b><br>%{y:.2f} kWh<extra></extra>'
+        } : {
+            x: timestamps,
+            y: aggregatedSimData.map(d => d.gridImportWithBattery),
             name: 'Optimized Import (kWh)',
             type: 'scatter',
             mode: 'lines',
@@ -214,9 +260,17 @@ const Visualizer = {
         };
 
         // Trace 4: Original Export (solid green) - always kWh
-        const origExportTrace = {
+        const origExportTrace = isAggregated ? {
             x: timestamps,
-            y: filteredOrigData.map(d => d.exportKwh),
+            y: aggregatedOrigData.map(d => d.exportKwh),
+            name: 'Original Export (kWh)',
+            type: 'bar',
+            marker: { color: '#10b981' },
+            yaxis: 'y',
+            hovertemplate: '<b>Original Export</b><br>%{y:.2f} kWh<extra></extra>'
+        } : {
+            x: timestamps,
+            y: aggregatedOrigData.map(d => d.exportKwh),
             name: 'Original Export (kWh)',
             type: 'scatter',
             mode: 'lines',
@@ -225,10 +279,18 @@ const Visualizer = {
             hovertemplate: '<b>Original Export</b><br>%{y:.2f} kWh<extra></extra>'
         };
 
-        // Trace 5: New Export (dashed light green) - always kWh
-        const newExportTrace = {
+        // Trace 5: New Export (dashed/lighter for bars) - always kWh
+        const newExportTrace = isAggregated ? {
             x: timestamps,
-            y: filteredSimData.map(d => d.gridExportWithBattery),
+            y: aggregatedSimData.map(d => d.gridExportWithBattery),
+            name: 'Optimized Export (kWh)',
+            type: 'bar',
+            marker: { color: '#6ee7b7' },
+            yaxis: 'y',
+            hovertemplate: '<b>Optimized Export</b><br>%{y:.2f} kWh<extra></extra>'
+        } : {
+            x: timestamps,
+            y: aggregatedSimData.map(d => d.gridExportWithBattery),
             name: 'Optimized Export (kWh)',
             type: 'scatter',
             mode: 'lines',
@@ -237,10 +299,10 @@ const Visualizer = {
             hovertemplate: '<b>Optimized Export</b><br>%{y:.2f} kWh<extra></extra>'
         };
 
-        // Trace 6: Battery SOC (solid purple, right axis)
+        // Trace 6: Battery SOC (solid purple, right axis) - always line to avoid covering other bars
         const batterySocTrace = {
             x: timestamps,
-            y: filteredSimData.map(d => d.batterySocKwh),
+            y: aggregatedSimData.map(d => d.batterySocKwh),
             name: 'Battery SOC',
             type: 'scatter',
             mode: 'lines',
@@ -299,9 +361,21 @@ const Visualizer = {
             }
         };
 
+        // Add tick format for aggregated data
+        if (aggregationLevel === 'daily') {
+            layout.xaxis.tickformat = '%Y-%m-%d';
+        } else if (aggregationLevel === 'monthly') {
+            layout.xaxis.tickformat = '%Y-%m';
+        }
+
+        // Add barmode for aggregated data
+        if (isAggregated) {
+            layout.barmode = 'group';
+        }
+
         const config = { responsive: true };
 
-        Plotly.newPlot('energyFlowChartContainer', 
+        Plotly.react('energyFlowChartContainer', 
             [solarTrace, origImportTrace, newImportTrace, origExportTrace, newExportTrace, batterySocTrace], 
             layout, 
             config

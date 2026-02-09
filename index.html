@@ -73,6 +73,14 @@
             <div class="button-group">
                 <button id="btnShowPower" class="view-toggle-btn">Show Solar Power (kW)</button>
                 <button id="btnShowEnergy" class="view-toggle-btn active">Show Solar Energy (kWh)</button>
+                
+                <!-- Visual separator -->
+                <span style="margin: 0 10px; color: var(--border-color); align-self: center;">|</span>
+                
+                <!-- Time Aggregation Controls -->
+                <button id="agg-overview-15min" class="view-toggle-btn active">15 min</button>
+                <button id="agg-overview-daily" class="view-toggle-btn">Daily</button>
+                <button id="agg-overview-monthly" class="view-toggle-btn">Monthly</button>
             </div>
         </div>
 
@@ -245,6 +253,14 @@
                 <div class="button-group" style="margin-bottom: 10px;">
                     <button id="btnEnergyFlowPower" class="view-toggle-btn">Show Solar Power (kW)</button>
                     <button id="btnEnergyFlowEnergy" class="view-toggle-btn active">Show Solar Energy (kWh)</button>
+                    
+                    <!-- Visual separator -->
+                    <span style="margin: 0 10px; color: var(--border-color); align-self: center;">|</span>
+                    
+                    <!-- Time Aggregation Controls -->
+                    <button id="agg-flow-15min" class="view-toggle-btn active">15 min</button>
+                    <button id="agg-flow-daily" class="view-toggle-btn">Daily</button>
+                    <button id="agg-flow-monthly" class="view-toggle-btn">Monthly</button>
                 </div>
                 <div id="energyFlowChartContainer" style="height: 600px; width: 100%;"></div>
             </div>

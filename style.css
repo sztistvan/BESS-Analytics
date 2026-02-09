@@ -189,6 +189,18 @@ footer {
     border-color: var(--accent-color);
 }
 
+.view-toggle-btn:disabled {
+    background-color: #2a2e33;
+    color: #5a6570;
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.view-toggle-btn:disabled:hover {
+    background-color: #2a2e33;
+    color: #5a6570;
+}
+
 /* Time Range Controls */
 .time-range-controls {
     display: flex;
