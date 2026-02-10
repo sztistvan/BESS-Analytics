@@ -230,7 +230,17 @@ const YearlyAnalysis = {
             monthlyBuckets[month].dataPoints++;
         });
         
-        // Calculate metrics for each month
+        // Initialize cumulative tracking for tier-based financial calculations
+        let cumulativeBaselineImport = 0;
+        let cumulativeBatteryImport = 0;
+        
+        const prices = BatterySimulation.config.pricing[BatterySimulation.config.currency];
+        const tier1Price = prices.tier1ImportPrice;
+        const tier2Price = prices.tier2ImportPrice;
+        const exportPrice = prices.exportPrice;
+        const tier1Limit = prices.tier1LimitKwh; // Full annual limit (2523 kWh)
+        
+        // Calculate metrics for each month with cumulative tier tracking
         const monthlyResults = monthlyBuckets.map(bucket => {
             const selfConsumptionBefore = bucket.solarProduction - bucket.gridExportOriginal;
             const selfConsumptionAfter = bucket.solarProduction - bucket.gridExportOptimized;
@@ -246,15 +256,47 @@ const YearlyAnalysis = {
                 ? (gridExportReduction / bucket.gridExportOriginal * 100)
                 : 0;
             
-            // Calculate monthly financial metrics (proportional to data points)
+            // Calculate monthly financial metrics with cumulative tier tracking
             let baselineCost = 0;
             let batteryCost = 0;
             
-            if (financialMetrics && yearData.length > 0) {
-                const monthFraction = bucket.dataPoints / yearData.length;
-                baselineCost = financialMetrics.baselineCost * monthFraction;
-                batteryCost = financialMetrics.batteryCost * monthFraction;
+            // BASELINE scenario - calculate cost with tier boundary detection
+            const baselineImportBefore = cumulativeBaselineImport;
+            const baselineImportAfter = cumulativeBaselineImport + bucket.gridImportOriginal;
+            
+            if (baselineImportAfter <= tier1Limit) {
+                // All consumption in Tier 1
+                baselineCost = bucket.gridImportOriginal * tier1Price;
+            } else if (baselineImportBefore >= tier1Limit) {
+                // All consumption in Tier 2
+                baselineCost = bucket.gridImportOriginal * tier2Price;
+            } else {
+                // Crosses tier boundary - split calculation
+                const tier1Kwh = tier1Limit - baselineImportBefore;
+                const tier2Kwh = bucket.gridImportOriginal - tier1Kwh;
+                baselineCost = (tier1Kwh * tier1Price) + (tier2Kwh * tier2Price);
             }
+            baselineCost -= bucket.gridExportOriginal * exportPrice; // Subtract export revenue
+            cumulativeBaselineImport += bucket.gridImportOriginal;
+            
+            // BATTERY scenario - calculate cost with tier boundary detection
+            const batteryImportBefore = cumulativeBatteryImport;
+            const batteryImportAfter = cumulativeBatteryImport + bucket.gridImportOptimized;
+            
+            if (batteryImportAfter <= tier1Limit) {
+                // All consumption in Tier 1
+                batteryCost = bucket.gridImportOptimized * tier1Price;
+            } else if (batteryImportBefore >= tier1Limit) {
+                // All consumption in Tier 2
+                batteryCost = bucket.gridImportOptimized * tier2Price;
+            } else {
+                // Crosses tier boundary - split calculation
+                const tier1Kwh = tier1Limit - batteryImportBefore;
+                const tier2Kwh = bucket.gridImportOptimized - tier1Kwh;
+                batteryCost = (tier1Kwh * tier1Price) + (tier2Kwh * tier2Price);
+            }
+            batteryCost -= bucket.gridExportOptimized * exportPrice; // Subtract export revenue
+            cumulativeBatteryImport += bucket.gridImportOptimized;
             
             const savings = baselineCost - batteryCost;
             const savingsPct = baselineCost > 0 ? (savings / baselineCost * 100) : 0;

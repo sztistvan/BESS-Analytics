@@ -5,7 +5,8 @@
 # Temporal files
 *.log
 .tmp/
-
+temp*/
+local*/
 
 # Environment variables
 .env
@@ -17,5 +18,4 @@ backups/
 # GitHub related
 .github/
 
-# Documentation
-docs/
+
