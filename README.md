@@ -24,10 +24,14 @@
 **Key Features:**
 - 🔋 **Battery Simulation Engine** with realistic charging/discharging physics
 - 📊 **Optimization Curve** - automated analysis across 11 battery capacities
+- � **Solar Self-Consumption Analysis** - yearly breakdown with monthly reports and export
 - 💰 **Financial Analysis** with progressive pricing (Tier1/Tier2)
 - 🔄 **Dual Inverter Modes** - Asymmetric (modern) / Symmetric (legacy)
-- 📈 **Interactive Visualizations** powered by Plotly.js
-- 🌍 **Bilingual Interface** - English & Hungarian
+- ⏱️ **Time Aggregation** - view data at 15-min, daily, or monthly intervals
+- 📈 **Interactive Visualizations** powered by Plotly.js with energy flow charts
+- 🌍 **Bilingual Interface** - English & Hungarian with 7-section help system
+- 📊 **Demo Data Included** - instant testing with realistic solar scenarios
+- 📱 **Mobile Optimized** - responsive design for tablets and phones
 - 📁 **Universal CSV Import** - flexible timestamp parsing
 - 💾 **No Installation Required** - runs entirely in your browser
 
@@ -82,8 +86,10 @@ Timestamp,Import (kWh),Export (kWh)
 ### 🎬 Quick Start
 
 #### Option 1: Use Demo Data (Recommended)
+No file preparation needed - demo data includes realistic solar and grid patterns from a real installation.
+
 1. Open `index.html` in your browser
-2. Click **"📊 Load Demo Scenarios"**
+2. Click **"📊 Load Demo Scenarios"** (instantly loads sample data)
 3. Select time range (try "Year" for full analysis)
 4. Click **"⚡ Run Battery Simulation"**
 5. Explore the results!
@@ -105,9 +111,19 @@ Timestamp,Import (kWh),Export (kWh)
 - **Max Discharge Power (kW)**: Maximum discharging rate
 - **Min/Max SOC (%)**: Operating range (typical: 10-90%)
 
+#### Navigation Controls
+- **Preset Buttons**: Week (last 7 days, Monday start), Month (30 days), Year (365 days), Full Range
+- **Arrow Navigation**: Use ← and → buttons to quickly move backward/forward by the selected interval
+- **Current Button**: Jump to the most recent data in your dataset
+- **Custom Range**: Precise start/end date and time picker for specific periods
+
 #### Inverter Modes
 - **Asymmetric** (Default): Modern hybrid inverters that optimize power distribution across phases
 - **Symmetric**: Legacy inverters with equal phase distribution
+
+#### Currency Selection
+- **Supported Currencies**: HUF (Ft) and EUR (€)
+- All financial displays (KPIs, charts, exports) update automatically based on selection
 
 #### Financial Settings
 - **Import Price Tier1**: Discounted electricity rate (HUF/kWh)
@@ -134,6 +150,54 @@ Models the Hungarian electricity market:
 
 Example: 30-day simulation → Tier1 limit = 2,523 × (30/365) ≈ 207 kWh
 
+#### Energy Flow Visualization
+Side-by-side comparison of energy flow before and after battery installation:
+- Visualizes original grid import/export (without battery)
+- Shows optimized grid import/export (with battery)
+- Displays battery state of charge (SOC) over time
+- Independent Power/Energy toggle and time aggregation controls
+- **Use Case**: See exactly when your battery charges and discharges throughout the day
+
+#### Time Aggregation (15min/Daily/Monthly)
+View your data at different time scales for better insights:
+- **15-minute**: Original high-resolution data (35,040 points/year)
+- **Daily**: Aggregated daily view (365 points/year) - ideal for weekly/monthly patterns
+- **Monthly**: Aggregated monthly view (12 points/year) - perfect for seasonal analysis
+- Independent controls for each chart (overview and energy flow)
+- Smart aggregation: sums energy values (kWh), averages power values (kW) and battery SOC
+- **Use Case**: Monthly view reveals seasonal patterns invisible in 15-minute data
+
+#### Solar Self-Consumption Analysis (Yearly Report)
+Comprehensive year-based analysis with monthly breakdown and financial tracking:
+
+**Input:**
+- Year selection dropdown (auto-populated with complete years)
+- Battery capacity input (inherits all other settings from main configuration)
+
+**Summary Cards:**
+- Solar Self-Consumption (No Battery): kWh and % of total production
+- Solar Self-Consumption (With Battery): kWh and % improvement
+- Grid Export Reduction: kWh and % savings
+
+**Monthly Breakdown Table:**
+- 12 monthly rows + TOTAL summary row
+- Columns: Month, Before Battery, After Battery, Grid Export Reduction
+- Optional financial columns (💰 toggle button): Baseline Cost, Battery Cost, Total Savings
+- Cumulative tier tracking for accurate utility bill modeling
+
+**Dual Chart Visualization:**
+- Chart 1: Absolute values (kWh) - grouped bar chart
+- Chart 2: Percentage view (%) - grouped bar chart
+- Color-coded: Before (orange), After (green), Reduction (blue)
+
+**Export Capabilities:**
+- 📋 Copy to Clipboard: TSV format for pasting into Excel/Google Sheets
+- 📥 Download CSV: Full data with metadata and timestamp
+
+**Use Case**: Perfect for annual ROI analysis and professional client reports
+
+⚠️ **Note**: Requires complete calendar year data (Jan 1 00:00 - Dec 31 23:45)
+
 ### 📂 Project Structure
 
 ```
@@ -143,18 +207,15 @@ BEES_Analytics/
 ├── js/
 │   ├── app.js             # Main orchestration (900+ lines)
 │   ├── csv_handler.js     # CSV parsing with flexible timestamps
-│   ├── data_merger.js     # Dataset alignment
+│   ├── data_merger.js     # Dataset alignment & aggregation
 │   ├── visualizer.js      # Plotly chart rendering
 │   ├── simulation.js      # Battery physics engine
+│   ├── yearly_analysis.js # Year-based monthly analysis
 │   └── help_modal.js      # Help system & UI components
 ├── data/
 │   ├── solar_power_15min.csv          # Demo solar data
 │   └── grid_meter_energy_15_min.csv   # Demo grid data
-├── docs/
-│   ├── implementation_notes_01_simulation.md
-│   ├── implementation_notes_02_how-to-use.md
-│   ├── implementation_notes_03_cost-benefit.md
-│   └── implementation_notes_06_battery_optimization_curve.md
+├── docs/                   # (reserved for future use)
 ├── README.md              # This file
 └── RELEASE_NOTES_v1.0.0.md  # Detailed release notes
 ```
@@ -207,11 +268,31 @@ xdg-open index.html
 | Safari | 14+ | ✅ Supported |
 | IE | Any | ❌ Not supported |
 
-### 🐛 Known Issues
+### � Mobile & Tablet Support
 
-- Large datasets (>1 year) may take 5-10 seconds to process
+Fully optimized responsive design for all device sizes:
+
+**Progressive Breakpoints:**
+- **Desktop** (>768px): Full-featured layout
+- **Tablets** (≤768px): Optimized layouts with touch-friendly controls
+- **Phones** (≤600px): Single-column layout, stacked components
+- **Small Phones** (≤480px): Compact design with scaled fonts
+
+**Mobile Features:**
+- 👆 Touch-friendly controls (48px minimum touch targets)
+- 📱 Single-column layouts for easy scrolling
+- 📊 Responsive charts with full touch gesture support
+- 📊 Horizontal scroll tables with sticky first column
+- 🔤 Progressive font scaling for readability
+
+**Use Case**: Perfect for solar consultants presenting analysis on tablets during client site visits
+
+### �🐛 Known Issues
+
+- Large datasets (>1 year): Use Daily/Monthly aggregation for improved chart rendering performance
 - CSV files must have consistent 15-minute intervals (no gaps)
 - Maximum 200 kWh capacity in optimization curve
+- Yearly Analysis feature requires complete calendar year data (Jan 1 - Dec 31)
 - No battery degradation modeling (planned for v2.0)
 
 ### 🔮 Roadmap
@@ -281,10 +362,14 @@ A **BEES Analytics** segít a napelemes rendszertulajdonosoknak, energetikai tan
 **Főbb funkciók:**
 - 🔋 **Akkumulátor Szimulációs Motor** valósághű töltési/kisütési fizikával
 - 📊 **Optimalizációs Görbe** - automata elemzés 11 különböző kapacitásra
+- � **Napelemes Önfogyasztás Elemzés** - éves bontás havi riportokkal és exportálással
 - 💰 **Pénzügyi Elemzés** sávos árazással (Tier1/Tier2)
 - 🔄 **Kettős Inverter Mód** - Aszimmetrikus (modern) / Szimmetrikus (régi)
-- 📈 **Interaktív Vizualizációk** Plotly.js technológiával
-- 🌍 **Kétnyelvű Felület** - Angol és Magyar
+- ⏱️ **Időaggregáció** - adatok megtekintése 15 perces, napi vagy havi bontásban
+- 📈 **Interaktív Vizualizációk** Plotly.js technológiával és energia áramlási diagramokkal
+- 🌍 **Kétnyelvű Felület** - Angol és Magyar 7 szakaszos súgórendszerrel
+- 📊 **Demo Adatok Mellékelve** - azonnali tesztelés valósághű napelemes forgatókönyvekkel
+- 📱 **Mobil Optimalizált** - reszponzív dizájn táblagépekhez és telefonokhoz
 - 📁 **Univerzális CSV Import** - rugalmas időbélyeg felismerés
 - 💾 **Telepítés Nem Szükséges** - teljesen böngészőben fut
 
@@ -339,8 +424,10 @@ Időbélyeg,Import (kWh),Export (kWh)
 ### 🎬 Gyors Kezdés
 
 #### 1. Opció: Használd a Demo Adatokat (Ajánlott)
+Nincs szükség fájl előkészítésre - a demo adatok valós telepítésből származó, valósághű napelemes és hálózati mintákat tartalmaznak.
+
 1. Nyisd meg az `index.html` fájlt a böngésződben
-2. Kattints a **"📊 Load Demo Scenarios"** gombra
+2. Kattints a **"📊 Load Demo Scenarios"** gombra (azonnal betölti a mintaadatokat)
 3. Válassz időtartományt (próbáld ki a "Year"-t teljes elemzéshez)
 4. Kattints a **"⚡ Run Battery Simulation"** gombra
 5. Fedezd fel az eredményeket!
@@ -362,9 +449,19 @@ Időbélyeg,Import (kWh),Export (kWh)
 - **Max Kisütési Teljesítmény (kW)**: Maximális kisütési sebesség
 - **Min/Max SOC (%)**: Működési tartomány (tipikus: 10-90%)
 
+#### Navigációs Vezérlők
+- **Előre Beállított Gombok**: Hét (utolsó 7 nap, hétfő kezdéssel), Hónap (30 nap), Év (365 nap), Teljes Tartomány
+- **Nyíl Navigáció**: Használd a ← és → gombokat a gyors előre/hátra lépéshez a kiválasztott intervallummal
+- **Current Gomb**: Ugrás a legfrissebb adatokra az adathalmazban
+- **Egyéni Tartomány**: Pontos kezdő/befejező dátum és időválasztó meghatározott időszakokhoz
+
 #### Inverter Módok
 - **Aszimmetrikus** (Alapértelmezett): Modern hibrid inverterek, amelyek optimalizálják a teljesítmény elosztást a fázisok között
 - **Szimmetrikus**: Régebbi inverterek egyenletes fázis elosztással
+
+#### Valuta Választás
+- **Támogatott Valuták**: HUF (Ft) és EUR (€)
+- Minden pénzügyi megjelenítés (KPI-ok, diagramok, exportok) automatikusan frissül a választás alapján
 
 #### Pénzügyi Beállítások
 - **Import Ár Tier1**: Kedvezményes áramár (Ft/kWh)
@@ -390,6 +487,54 @@ Modellezi a magyar villamosenergia piacot:
 - **Auto-skálázás**: Arányosan igazodik 1 évnél rövidebb időszakokhoz
 
 Példa: 30 napos szimuláció → Tier1 limit = 2,523 × (30/365) ≈ 207 kWh
+
+#### Energia Áramlás Vizualizáció
+Egymás melletti összehasonlítás az energia áramlásról akkumulátor telepítése előtt és után:
+- Megjeleníti az eredeti hálózati import/export adatokat (akkumulátor nélkül)
+- Mutatja az optimalizált hálózati import/export értékeket (akkumulátorral)
+- Kijelzi az akkumulátor töltöttségi szintjét (SOC) az idő múlásával
+- Független Teljesítmény/Energia váltó és időaggregációs vezérlők
+- **Használati eset**: Lásd pontosan, mikor töltődik és sül ki az akkumulátorod a nap folyamán
+
+#### Időaggregáció (15perc/Napi/Havi)
+Tekintsd meg az adatokat különböző időskálákon a jobb betekintésért:
+- **15 perces**: Eredeti nagy felbontású adatok (35 040 pont/év)
+- **Napi**: Napi aggregált nézet (365 pont/év) - ideális heti/havi mintákhoz
+- **Havi**: Havi aggregált nézet (12 pont/év) - tökéletes szezonális elemzéshez
+- Független vezérlők minden diagramhoz (áttekintés és energia áramlás)
+- Okos aggregáció: összegzi az energia értékeket (kWh), átlagolja a teljesítmény értékeket (kW) és az akkumulátor SOC-t
+- **Használati eset**: A havi nézet feltárja a szezonális mintákat, amelyek láthatatlanok a 15 perces adatokban
+
+#### Napelemes Önfogyasztás Elemzés (Éves Riport)
+Átfogó évenkénti elemzés havi bontással és pénzügyi követéssel:
+
+**Bemenet:**
+- Év választó legördülő menü (automatikusan feltöltve a teljes évekkel)
+- Akkumulátor kapacitás bevitel (örökli az összes többi beállítást a fő konfigurációból)
+
+**Összefoglaló Kártyák:**
+- Napelemes Önfogyasztás (Akkumulátor Nélkül): kWh és % a teljes termelésből
+- Napelemes Önfogyasztás (Akkumulátorral): kWh és % javulás
+- Hálózati Export Csökkenés: kWh és % megtakarítás
+
+**Havi Bontási Táblázat:**
+- 12 havi sor + ÖSSZESEN összesítő sor
+- Oszlopok: Hónap, Akkumulátor Előtt, Akkumulátor Után, Hálózati Export Csökkenés
+- Opcionális pénzügyi oszlopok (💰 váltógomb): Alapköltség, Akkumulátoros Költség, Teljes Megtakarítás
+- Kumulatív sáv követés pontos közműszámla modellezéshez
+
+**Kettős Diagram Vizualizáció:**
+- 1. Diagram: Abszolút értékek (kWh) - csoportosított oszlopdiagram
+- 2. Diagram: Százalékos nézet (%) - csoportosított oszlopdiagram
+- Színkódolt: Előtte (narancs), Utána (zöld), Csökkenés (kék)
+
+**Exportálási Lehetőségek:**
+- 📋 Másolás Vágólapra: TSV formátum Excel/Google Sheets beillesztéshez
+- 📥 CSV Letöltés: Teljes adat metaadatokkal és időbélyeggel
+
+**Használati eset**: Tökéletes éves ROI elemzéshez és professzionális ügyfélriportokhoz
+
+⚠️ **Megjegyzés**: Teljes naptári évi adat szükséges (Jan 1 00:00 - Dec 31 23:45)
 
 ### 📂 Projekt Struktúra
 
@@ -421,11 +566,31 @@ start index.html
 
 [Ugyanaz mint az angol verzióban]
 
-### 🐛 Ismert Problémák
+### � Mobil és Táblagép Támogatás
 
-- Nagy adathalmazok (>1 év) 5-10 másodpercet vehetnek igénybe
+Teljesen optimalizált reszponzív dizájn minden eszközmérethez:
+
+**Progresszív Töréspontok:**
+- **Asztali** (>768px): Teljes funkciójú elrendezés
+- **Táblagépek** (≤768px): Optimalizált elrendezések érintésbarát vezérlőkkel
+- **Telefonok** (≤600px): Egyoszlopos elrendezés, halmozott komponensek
+- **Kis telefonok** (≤480px): Kompakt dizájn skálázott betűtípusokkal
+
+**Mobil Funkciók:**
+- 👆 Érintésbarát vezérlők (48px minimális érintési célpontok)
+- 📱 Egyoszlopos elrendezések könnyű görgetéshez
+- 📊 Reszponzív diagramok teljes érintési gesztus támogatással
+- 📊 Vízszintes görgetésű táblázatok ragadós első oszloppal
+- 🔤 Progresszív betűméret skálázás az olvashatóságért
+
+**Használati eset**: Tökéletes napelemes tanácsadóknak, akik táblagépen mutatják be az elemzést ügyfél helyszíni látogatások során
+
+### �🐛 Ismert Problémák
+
+- Nagy adathalmazok (>1 év): Használd a Napi/Havi aggregációt a javított diagram megjelenítési teljesítményért
 - CSV fájloknak konzisztens 15 perces intervallumokkal kell rendelkezniük (rések nélkül)
 - Maximum 200 kWh kapacitás az optimalizációs görbében
+- Éves Elemzés funkcióhoz teljes naptári évi adat szükséges (Jan 1 - Dec 31)
 - Nincs akkumulátor degradációs modell (tervezve v2.0-ban)
 
 ### 🔮 Fejlesztési Terv
