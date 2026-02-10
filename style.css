@@ -1023,8 +1023,21 @@ footer {
     margin: 15px 0;
 }
 
-/* Responsive Design */
+/* ========================================
+   RESPONSIVE DESIGN - MOBILE OPTIMIZATION
+   ======================================== */
+
+/* Tablet and Large Phones (Landscape) */
 @media (max-width: 768px) {
+    body {
+        padding: 15px;
+    }
+    
+    .container {
+        width: 100%;
+    }
+    
+    /* Modal adjustments */
     .modal-content {
         width: 95%;
         max-height: 90vh;
@@ -1057,17 +1070,166 @@ footer {
         flex-direction: column;
     }
     
+    /* Header optimization */
     .header-container {
         flex-direction: column;
         align-items: stretch;
+        gap: 16px;
     }
     
     .header-container h1 {
         text-align: center;
+        font-size: 1.6rem;
     }
     
     .help-btn {
         width: 100%;
+        min-height: 48px;
+    }
+    
+    /* Chart containers - force full width */
+    #energyFlowChart,
+    #batteryStateChart,
+    #optimizationCurveChart,
+    #yearlyChartAbsolute,
+    #yearlyChartPercentage {
+        width: 100% !important;
+        min-height: 400px;
+    }
+    
+    /* KPI Cards - ensure good mobile layout */
+    .kpi-cards {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+    }
+}
+
+/* Phone Portrait */
+@media (max-width: 600px) {
+    body {
+        padding: 10px;
+        font-size: 0.95rem;
+    }
+    
+    h1 {
+        font-size: 1.5rem;
+    }
+    
+    h3 {
+        font-size: 1.2rem;
+    }
+    
+    /* Import section */
+    .import-section {
+        padding: 15px;
+    }
+    
+    /* Time Range Controls - vertical stack */
+    .time-range-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+    
+    .preset-buttons {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .preset-btn {
+        flex: 1 1 calc(50% - 8px);
+        min-height: 48px;
+        padding: 12px 16px;
+    }
+    
+    .nav-buttons {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .nav-btn {
+        flex: 1;
+        min-height: 48px;
+        padding: 12px;
+    }
+    
+    .current-btn {
+        width: 100%;
+        min-height: 48px;
+    }
+    
+    /* Date inputs - full width */
+    .custom-date-inputs {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    /* Battery Configuration Grid - single column */
+    .config-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .config-item input[type="number"],
+    .config-item select {
+        padding: 14px;
+        font-size: 1rem;
+        min-height: 48px;
+    }
+    
+    /* Buttons - full width with proper touch targets */
+    .run-simulation-btn,
+    .apply-range-btn,
+    .demo-load-btn,
+    .calculate-btn {
+        width: 100%;
+        min-height: 52px;
+        padding: 14px 24px;
+        font-size: 1rem;
+    }
+    
+    /* KPI Cards - single column */
+    .kpi-cards,
+    .kpi-cards-container {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .kpi-card {
+        padding: 16px;
+    }
+    
+    .kpi-value {
+        font-size: 1.5rem;
+    }
+    
+    .kpi-label {
+        font-size: 0.85rem;
+    }
+    
+    /* Comparison cards */
+    .comparison-cards {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    /* Charts - optimize for mobile viewing */
+    #energyFlowChart,
+    #batteryStateChart,
+    #optimizationCurveChart,
+    #yearlyChartAbsolute,
+    #yearlyChartPercentage {
+        min-height: 350px;
+    }
+    
+    /* File inputs */
+    input[type="file"] {
+        font-size: 0.9rem;
+    }
+    
+    input[type="file"]::file-selector-button {
+        padding: 12px 16px;
+        font-size: 0.9rem;
     }
 }
 
@@ -1318,7 +1480,7 @@ footer {
     background: rgba(47, 129, 247, 0.05);
 }
 
-/* Responsive Design */
+/* Yearly Analysis - Tablet and Large Phones */
 @media (max-width: 768px) {
     .yearly-controls {
         flex-direction: column;
@@ -1347,18 +1509,142 @@ footer {
     }
 }
 
-@media (max-width: 480px) {
+/* Yearly Analysis - Phone Portrait */
+@media (max-width: 600px) {
     .yearly-analysis-section h2 {
         font-size: 1.5rem;
     }
     
+    .section-description {
+        font-size: 0.9rem;
+    }
+    
+    .yearly-controls {
+        gap: 12px;
+    }
+    
+    .calculate-btn {
+        padding: 14px 24px;
+        font-size: 1rem;
+    }
+    
+    .export-controls {
+        gap: 10px;
+    }
+    
+    .toggle-btn,
+    .export-btn {
+        width: 100%;
+        padding: 12px 20px;
+        min-height: 48px;
+    }
+    
+    /* Table wrapper with better scroll hints */
+    .table-wrapper {
+        position: relative;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .table-wrapper::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 30px;
+        background: linear-gradient(to left, rgba(11, 14, 20, 0.8), transparent);
+        pointer-events: none;
+    }
+    
     .monthly-table th {
         font-size: 0.75rem;
-        padding: 0.5rem 0.6rem;
+        padding: 0.7rem 0.8rem;
+        white-space: nowrap;
     }
     
     .monthly-table td {
         font-size: 0.8rem;
+        padding: 0.7rem 0.8rem;
+        white-space: nowrap;
+    }
+    
+    /* Sticky first column for month names */
+    .monthly-table thead th:first-child,
+    .monthly-table tbody td:first-child {
+        position: sticky;
+        left: 0;
+        background: #2d2d2d;
+        z-index: 1;
+    }
+    
+    .monthly-table thead th:first-child {
+        background: #3a3f47;
+    }
+    
+    .monthly-table tbody tr:last-child td:first-child {
+        background: #3a3f47;
+    }
+}
+
+/* Small Phones */
+@media (max-width: 480px) {
+    .yearly-analysis-section h2 {
+        font-size: 1.3rem;
+    }
+    
+    .monthly-table th {
+        font-size: 0.7rem;
         padding: 0.5rem 0.6rem;
+    }
+    
+    .monthly-table td {
+        font-size: 0.75rem;
+        padding: 0.5rem 0.6rem;
+    }
+    
+    #yearlyChartAbsolute,
+    #yearlyChartPercentage {
+        min-height: 300px;
+    }
+}
+
+/* Very Small Devices */
+@media (max-width: 375px) {
+    body {
+        padding: 8px;
+        font-size: 0.9rem;
+    }
+    
+    h1 {
+        font-size: 1.3rem;
+    }
+    
+    .import-section {
+        padding: 12px;
+    }
+    
+    .preset-btn {
+        font-size: 0.85rem;
+        padding: 10px 12px;
+    }
+    
+    .kpi-value {
+        font-size: 1.3rem;
+    }
+    
+    .modal-content {
+        width: 98%;
+        max-height: 92vh;
+    }
+    
+    .yearly-analysis-section h2 {
+        font-size: 1.2rem;
+    }
+    
+    .monthly-table th,
+    .monthly-table td {
+        font-size: 0.7rem;
+        padding: 0.4rem 0.5rem;
     }
 }
