@@ -2,7 +2,7 @@
 
 **Battery Energy Capacity Optimization and Economics Benefit Analysis** - An open-source, browser-based tool for analyzing solar + battery storage systems with advanced optimization features.
 
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/sztistvan/BEES_Analytics/releases)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](https://github.com/sztistvan/BEES_Analytics/releases)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 [![JavaScript](https://img.shields.io/badge/javascript-ES6+-yellow.svg)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
 [![Plotly](https://img.shields.io/badge/plotly.js-2.27.0-purple.svg)](https://plotly.com/javascript/)
@@ -216,8 +216,10 @@ BEES_Analytics/
 │   ├── solar_power_15min.csv          # Demo solar data
 │   └── grid_meter_energy_15_min.csv   # Demo grid data
 ├── docs/                   # (reserved for future use)
+├── local_docs/            # Implementation notes and planning docs
 ├── README.md              # This file
-└── RELEASE_NOTES_v1.0.0.md  # Detailed release notes
+├── RELEASE_NOTES_v1.0.0.md  # Initial release notes
+└── RELEASE_NOTES_v1.1.0.md  # Documentation update release notes
 ```
 
 ### 🛠️ Technologies
@@ -346,7 +348,7 @@ If you use this tool in research, please cite:
   title = {BEES Analytics: Battery Energy Economics Simulator},
   year = {2026},
   url = {https://github.com/sztistvan/BEES_Analytics},
-  version = {1.0.0}
+  version = {1.1.0}
 }
 ```
 
